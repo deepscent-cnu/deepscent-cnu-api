@@ -1,10 +1,10 @@
-package deepscent_cnu.api.deepsent;
+package deepscent_cnu.deepscent_cnu_api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DeepsentApplicationTests {
+class DeepscentCnuApiApplicationTests {
 
 	@Test
 	void contextLoads() {
