@@ -1,4 +1,4 @@
-package com.example.deepsent;
+package deepscent_cnu.api.deepsent;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
