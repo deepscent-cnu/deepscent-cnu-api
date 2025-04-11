@@ -5,11 +5,11 @@ import lombok.Getter;
 @Getter
 public class ApplicationException extends RuntimeException {
 
-    private final ErrorCode errorCode;
+  private final ErrorCode errorCode;
 
-    public ApplicationException(ErrorCode errorCode) {
-        super(errorCode.message());
-        this.errorCode = errorCode;
-    }
+  public ApplicationException(ErrorCode errorCode) {
+    super(errorCode.message());
+    this.errorCode = errorCode;
+  }
 
 }
