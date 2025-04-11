@@ -5,6 +5,8 @@ import deepscent_cnu.deepscent_cnu_api.auth.dto.SignupRequest;
 import deepscent_cnu.deepscent_cnu_api.auth.dto.MemberResponse;
 import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
 import deepscent_cnu.deepscent_cnu_api.auth.repository.MemberRepository;
+import deepscent_cnu.deepscent_cnu_api.exception.ErrorCode;
+import deepscent_cnu.deepscent_cnu_api.exception.MemberException;
 import deepscent_cnu.deepscent_cnu_api.util.JwtTokenProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,7 @@ public class MemberService {
 
     public MemberResponse signup(SignupRequest request) {
         if (memberRepository.findByUsername(request.username()).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+            throw new MemberException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
         Member member = new Member(null, request.name(), request.birthDate(), request.phoneNumber(), request.username(), passwordEncoder.encode(request.password()));
@@ -36,10 +38,10 @@ public class MemberService {
 
     public MemberResponse login(LoginRequest request) {
         Member member = memberRepository.findByUsername(request.username())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.password(), member.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new MemberException(ErrorCode.INVALID_PASSWORD);
         }
 
         String token = jwtTokenProvider.createToken(member.getUsername());
