@@ -1,6 +1,7 @@
 package deepscent_cnu.deepscent_cnu_api.auth.service;
 
-import deepscent_cnu.deepscent_cnu_api.auth.dto.MemberRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.LoginRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.SignupRequest;
 import deepscent_cnu.deepscent_cnu_api.auth.dto.MemberResponse;
 import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
 import deepscent_cnu.deepscent_cnu_api.auth.repository.MemberRepository;
@@ -21,7 +22,7 @@ public class MemberService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    public MemberResponse signup(MemberRequest request) {
+    public MemberResponse signup(SignupRequest request) {
         if (memberRepository.findByUsername(request.username()).isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
         }
@@ -33,7 +34,7 @@ public class MemberService {
         return new MemberResponse(savedMember.getId(), savedMember.getName(), savedMember.getBirthDate(), savedMember.getPhoneNumber(), savedMember.getUsername(), token);
     }
 
-    public MemberResponse login(MemberRequest request) {
+    public MemberResponse login(LoginRequest request) {
         Member member = memberRepository.findByUsername(request.username())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 

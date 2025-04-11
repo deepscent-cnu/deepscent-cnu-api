@@ -17,7 +17,7 @@ public class Member {
 
     @Column(unique = true)
     private String username;
-    private String password; // 해시된 비밀번호
+    private String password;  // 해시된 비밀번호
 
     public Member() {
 
