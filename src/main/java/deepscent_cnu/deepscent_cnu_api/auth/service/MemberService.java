@@ -75,4 +75,11 @@ public class MemberService {
         token
     );
   }
+
+  @Transactional
+  public void deleteMember(String username) {
+    Member member = memberRepository.findByUsername(username)
+        .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+    memberRepository.delete(member);
+  }
 }
