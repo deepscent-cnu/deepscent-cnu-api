@@ -8,6 +8,7 @@ import deepscent_cnu.deepscent_cnu_api.auth.repository.MemberRepository;
 import deepscent_cnu.deepscent_cnu_api.exception.ErrorCode;
 import deepscent_cnu.deepscent_cnu_api.exception.MemberException;
 import deepscent_cnu.deepscent_cnu_api.util.JwtTokenProvider;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ public class MemberService {
     this.jwtTokenProvider = jwtTokenProvider;
   }
 
+  @Transactional
   public MemberResponse signup(SignupRequest request) {
     if (memberRepository.findByUsername(request.username()).isPresent()) {
       throw new MemberException(ErrorCode.USERNAME_ALREADY_EXISTS);
@@ -54,6 +56,7 @@ public class MemberService {
     );
   }
 
+  @Transactional
   public MemberResponse login(LoginRequest request) {
     Member member = memberRepository.findByUsername(request.username())
         .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
