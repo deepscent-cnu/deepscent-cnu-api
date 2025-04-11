@@ -5,6 +5,7 @@ import deepscent_cnu.deepscent_cnu_api.auth.dto.MemberResponse;
 import deepscent_cnu.deepscent_cnu_api.auth.dto.SignupRequest;
 import deepscent_cnu.deepscent_cnu_api.auth.service.MemberService;
 import deepscent_cnu.deepscent_cnu_api.exception.ErrorCode;
+import deepscent_cnu.deepscent_cnu_api.util.ApiResponse;
 import deepscent_cnu.deepscent_cnu_api.util.JwtTokenProvider;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -29,33 +30,34 @@ public class AuthController {
   }
 
   @PostMapping("/signup")
-  public ResponseEntity<String> signup(@Valid @RequestBody SignupRequest request) {
+  public ResponseEntity<ApiResponse<String>> signup(@Valid @RequestBody SignupRequest request) {
     MemberResponse memberResponse = memberService.signup(request);
-    return ResponseEntity.ok(memberResponse.token());  // 프론트에서 이 토큰 저장해서 사용
+    return ResponseEntity.ok(new ApiResponse<>(true, "회원 가입 성공", memberResponse.token()));
   }
 
   @PostMapping("/login")
-  public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request) {
+  public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody LoginRequest request) {
     MemberResponse memberResponse = memberService.login(request);
-    return ResponseEntity.ok(memberResponse.token());  // 프론트에서 이 토큰 저장해서 사용
+    return ResponseEntity.ok(new ApiResponse<>(true, "로그인 성공", memberResponse.token()));
   }
 
   @DeleteMapping("/withdraw")
-  public ResponseEntity<String> withdraw(@RequestHeader("Authorization") String authHeader) {
+  public ResponseEntity<ApiResponse<Object>> withdraw(@RequestHeader("Authorization") String authHeader) {
     if (authHeader == null || authHeader.isEmpty()) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-          .body(ErrorCode.TOKEN_REQUIRED.message());
+          .body(new ApiResponse<>(false, ErrorCode.TOKEN_REQUIRED.message(), null));
     }
 
     // Authorization 헤더: "Bearer <token>"
     String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
 
     if (!jwtTokenProvider.validateToken(token)) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorCode.INVALID_TOKEN.message());
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(new ApiResponse<>(false, ErrorCode.INVALID_TOKEN.message(), null));
     }
-    String username = jwtTokenProvider.getUsername(token);
 
+    String username = jwtTokenProvider.getUsername(token);
     memberService.deleteMember(username);
-    return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+    return ResponseEntity.ok(new ApiResponse<>(true, "회원 탈퇴가 완료되었습니다.", null));
   }
 }
