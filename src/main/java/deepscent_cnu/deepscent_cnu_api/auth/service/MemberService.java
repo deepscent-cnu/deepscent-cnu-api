@@ -18,8 +18,11 @@ public class MemberService {
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
 
-  public MemberService(MemberRepository memberRepository, PasswordEncoder passwordEncoder,
-      JwtTokenProvider jwtTokenProvider) {
+  public MemberService(
+      MemberRepository memberRepository,
+      PasswordEncoder passwordEncoder,
+      JwtTokenProvider jwtTokenProvider
+  ) {
     this.memberRepository = memberRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtTokenProvider = jwtTokenProvider;
@@ -30,13 +33,25 @@ public class MemberService {
       throw new MemberException(ErrorCode.USERNAME_ALREADY_EXISTS);
     }
 
-    Member member = new Member(null, request.name(), request.birthDate(), request.phoneNumber(),
-        request.username(), passwordEncoder.encode(request.password()));
+    Member member = new Member(
+        null,
+        request.name(),
+        request.birthDate(),
+        request.phoneNumber(),
+        request.username(),
+        passwordEncoder.encode(request.password())
+    );
     Member savedMember = memberRepository.save(member);
 
     String token = jwtTokenProvider.createToken(savedMember.getUsername());
-    return new MemberResponse(savedMember.getId(), savedMember.getName(),
-        savedMember.getBirthDate(), savedMember.getPhoneNumber(), savedMember.getUsername(), token);
+    return new MemberResponse(
+        savedMember.getId(),
+        savedMember.getName(),
+        savedMember.getBirthDate(),
+        savedMember.getPhoneNumber(),
+        savedMember.getUsername(),
+        token
+    );
   }
 
   public MemberResponse login(LoginRequest request) {
@@ -48,7 +63,13 @@ public class MemberService {
     }
 
     String token = jwtTokenProvider.createToken(member.getUsername());
-    return new MemberResponse(member.getId(), member.getName(), member.getBirthDate(),
-        member.getPhoneNumber(), member.getUsername(), token);
+    return new MemberResponse(
+        member.getId(),
+        member.getName(),
+        member.getBirthDate(),
+        member.getPhoneNumber(),
+        member.getUsername(),
+        token
+    );
   }
 }

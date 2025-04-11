@@ -29,7 +29,14 @@ public class Member {
 
   }
 
-  public Member(Long id, String name, LocalDate birthDate, String phoneNumber, String username, String password) {
+  public Member(
+      Long id,
+      String name,
+      LocalDate birthDate,
+      String phoneNumber,
+      String username,
+      String password
+  ) {
     this.id = id;
     this.name = name;
     this.birthDate = birthDate;
