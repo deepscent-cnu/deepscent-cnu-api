@@ -4,6 +4,7 @@ import deepscent_cnu.deepscent_cnu_api.auth.dto.LoginRequest;
 import deepscent_cnu.deepscent_cnu_api.auth.dto.MemberResponse;
 import deepscent_cnu.deepscent_cnu_api.auth.dto.SignupRequest;
 import deepscent_cnu.deepscent_cnu_api.auth.service.MemberService;
+import deepscent_cnu.deepscent_cnu_api.exception.ErrorCode;
 import deepscent_cnu.deepscent_cnu_api.util.JwtTokenProvider;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -42,14 +43,15 @@ public class AuthController {
   @DeleteMapping("/withdraw")
   public ResponseEntity<String> withdraw(@RequestHeader("Authorization") String authHeader) {
     if (authHeader == null || authHeader.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 필요합니다.");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(ErrorCode.TOKEN_REQUIRED.message());
     }
 
     // Authorization 헤더: "Bearer <token>"
     String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
 
     if (!jwtTokenProvider.validateToken(token)) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다.");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorCode.INVALID_TOKEN.message());
     }
     String username = jwtTokenProvider.getUsername(token);
 
