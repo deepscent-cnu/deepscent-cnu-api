@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.time.LocalDate;
 import lombok.Getter;
 
 @Entity
@@ -17,8 +18,8 @@ public class Member {
   private Long id;
 
   private String name;
-  private String birthDate;
-  private String phoneNumber;
+  private LocalDate birthDate;  // e.g. 2025-04-11
+  private String phoneNumber;  // e.g. 01012341234 (하이픈 미포함, 11자리)
 
   @Column(unique = true)
   private String username;
@@ -28,8 +29,7 @@ public class Member {
 
   }
 
-  public Member(Long id, String name, String birthDate, String phoneNumber, String username,
-      String password) {
+  public Member(Long id, String name, LocalDate birthDate, String phoneNumber, String username, String password) {
     this.id = id;
     this.name = name;
     this.birthDate = birthDate;

@@ -24,12 +24,12 @@ public class AuthController {
   @PostMapping("/signup")
   public ResponseEntity<String> signup(@Valid @RequestBody SignupRequest request) {
     MemberResponse memberResponse = memberService.signup(request);
-    return ResponseEntity.ok(memberResponse.token()); // 프론트에서 이 토큰 저장해서 사용
+    return ResponseEntity.ok(memberResponse.token());  // 프론트에서 이 토큰 저장해서 사용
   }
 
   @PostMapping("/login")
   public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request) {
     MemberResponse memberResponse = memberService.login(request);
-    return ResponseEntity.ok(memberResponse.token()); // 프론트에서 이 토큰 저장해서 사용
+    return ResponseEntity.ok(memberResponse.token());  // 프론트에서 이 토큰 저장해서 사용
   }
 }
