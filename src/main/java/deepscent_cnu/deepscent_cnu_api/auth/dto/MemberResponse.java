@@ -6,6 +6,6 @@ public record MemberResponse(
         String birthDate,
         String phoneNumber,
         String username,
-        String password
+        String token
 ) {
 }
