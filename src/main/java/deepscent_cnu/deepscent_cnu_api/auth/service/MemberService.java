@@ -32,4 +32,16 @@ public class MemberService {
         String token = jwtTokenProvider.createToken(savedMember.getUsername());
         return new MemberResponse(savedMember.getId(), savedMember.getName(), savedMember.getBirthDate(), savedMember.getPhoneNumber(), savedMember.getUsername(), token);
     }
+
+    public MemberResponse login(MemberRequest request) {
+        Member member = memberRepository.findByUsername(request.username())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        if (!passwordEncoder.matches(request.password(), member.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        String token = jwtTokenProvider.createToken(member.getUsername());
+        return new MemberResponse(member.getId(), member.getName(), member.getBirthDate(), member.getPhoneNumber(), member.getUsername(), token);
+    }
 }
