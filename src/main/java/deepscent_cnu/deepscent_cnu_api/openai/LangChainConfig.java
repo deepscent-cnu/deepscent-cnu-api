@@ -23,11 +23,10 @@ public class LangChainConfig {
     public ChatLanguageModel chatModel() {
         return OpenAiChatModel.builder()
                 .apiKey(OPEN_API_KEY)
-                .modelName("gpt-3.5-turbo")
+                .modelName("gpt-4o")
                 .logRequests(true)
                 .logResponses(true)
                 .build();
-
     }
 
     @Bean
