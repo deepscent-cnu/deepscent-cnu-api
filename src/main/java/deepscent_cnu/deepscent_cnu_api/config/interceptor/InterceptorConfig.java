@@ -27,8 +27,13 @@ public class InterceptorConfig implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
+//    registry.addInterceptor(authTokenInterceptor())
+//        .addPathPatterns("/api/**")            // 모든 API path 에 적용
+//        .excludePathPatterns("/api/auth/signup", "/api/auth/login");  // 회원가입 및 로그인 엔드포인트 제외
     registry.addInterceptor(authTokenInterceptor())
-        .addPathPatterns("/api/**")            // 모든 API path 에 적용
-        .excludePathPatterns("/api/auth/signup", "/api/auth/login");  // 회원가입 및 로그인 엔드포인트 제외
+        .addPathPatterns("/api/auth/withdraw");
+
+    registry.addInterceptor(deepscentTokenInterceptor())
+        .addPathPatterns(InterceptorPath.CONTROL_FAN.getPath());
   }
 }

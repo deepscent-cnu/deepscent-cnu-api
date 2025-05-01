@@ -14,10 +14,11 @@ public class DeepscentTokenInterceptor implements HandlerInterceptor {
 
     String deepscentToken = request.getHeader(AUTHORIZATION);
 
-    if (deepscentToken == null) {
+    if (deepscentToken == null || !deepscentToken.startsWith("Bearer ")) {
       throw new Exception();
     }
 
+    deepscentToken = deepscentToken.substring(7);
     request.setAttribute("deepscentToken", deepscentToken);
 
     return true;
