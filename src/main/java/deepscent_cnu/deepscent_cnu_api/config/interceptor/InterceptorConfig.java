@@ -29,6 +29,6 @@ public class InterceptorConfig implements WebMvcConfigurer {
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(authTokenInterceptor())
         .addPathPatterns("/api/**")            // 모든 API path 에 적용
-        .excludePathPatterns("/api/auth/**");  // 인증 엔드포인트 제외
+        .excludePathPatterns("/api/auth/signup", "/api/auth/login");  // 회원가입 및 로그인 엔드포인트 제외
   }
 }
