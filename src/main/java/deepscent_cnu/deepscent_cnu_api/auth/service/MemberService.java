@@ -8,7 +8,7 @@ import deepscent_cnu.deepscent_cnu_api.auth.repository.MemberRepository;
 import deepscent_cnu.deepscent_cnu_api.exception.ErrorCode;
 import deepscent_cnu.deepscent_cnu_api.exception.MemberException;
 import deepscent_cnu.deepscent_cnu_api.util.JwtTokenProvider;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -81,5 +81,11 @@ public class MemberService {
     Member member = memberRepository.findByUsername(username)
         .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
     memberRepository.delete(member);
+  }
+
+  @Transactional(readOnly = true)
+  public Member findByUsername(String username) {
+    return memberRepository.findByUsername(username)
+        .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
   }
 }
