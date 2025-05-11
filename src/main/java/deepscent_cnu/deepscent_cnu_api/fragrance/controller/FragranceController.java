@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/device/{deviceId}/fragrance")
+@RequestMapping("/api/device/{deviceId}/fragrance")
 public class FragranceController {
 
   private final FragranceService fragranceService;
@@ -22,8 +22,8 @@ public class FragranceController {
 
   @PostMapping("/fan-state")
   public ResponseEntity<Void> controlFanState(@PathVariable("deviceId") String deviceId,
-      @RequestBody FanStateRequest fanStateRequest, @DeepscentToken String deepscentToken) {
-    fragranceService.patchDeviceState(deviceId, fanStateRequest, deepscentToken);
+      @RequestBody FanStateRequest fanStateRequest) {
+    fragranceService.patchDeviceState(deviceId, fanStateRequest);
     return ResponseEntity.noContent().build();
   }
 }

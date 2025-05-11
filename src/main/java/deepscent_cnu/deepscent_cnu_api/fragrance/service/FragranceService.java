@@ -7,6 +7,7 @@ import deepscent_cnu.deepscent_cnu_api.fragrance.dto.external.deepscent.DeviceSt
 import deepscent_cnu.deepscent_cnu_api.fragrance.dto.request.FanStateRequest;
 import java.net.URI;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,12 @@ import org.springframework.web.client.RestClient;
 @Service
 public class FragranceService {
 
-  private final String AUTHORIZATION = "Authorization";
+  @Value("${deepscent.access-token}")
+  private String deepscentAccessToken;
 
-  private final String DEEPSCENT_BASE_URL = "https://b2b-prod.deepscent.io";
+  private static final String AUTHORIZATION = "Authorization";
+
+  private static final String DEEPSCENT_BASE_URL = "https://b2b-prod.deepscent.io";
   private final RestClient restClient = RestClient.builder().build();
   private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -36,15 +40,14 @@ public class FragranceService {
         DeviceStateResponse.class);
   }
 
-  public void patchDeviceState(String deviceId, FanStateRequest fanStateRequest,
-      String deepscentToken) {
+  public void patchDeviceState(String deviceId, FanStateRequest fanStateRequest) {
     String target_uri = DEEPSCENT_BASE_URL + "/api/device/" + deviceId + "/state";
     Map<String, Object> payload = Map.of("fan" + fanStateRequest.fanNumber(),
         fanStateRequest.fanSpeed());
 
     ResponseEntity<String> response = restClient.patch()
         .uri(URI.create(target_uri))
-        .header(AUTHORIZATION, deepscentToken)
+        .header(AUTHORIZATION, deepscentAccessToken)
         .contentType(MediaType.APPLICATION_JSON)
         .body(payload)
         .retrieve()
