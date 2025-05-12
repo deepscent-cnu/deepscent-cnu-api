@@ -8,9 +8,9 @@ import deepscent_cnu.deepscent_cnu_api.auth.repository.MemberRepository;
 import deepscent_cnu.deepscent_cnu_api.exception.ErrorCode;
 import deepscent_cnu.deepscent_cnu_api.exception.MemberException;
 import deepscent_cnu.deepscent_cnu_api.util.JwtTokenProvider;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MemberService {

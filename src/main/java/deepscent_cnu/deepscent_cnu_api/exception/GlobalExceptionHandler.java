@@ -13,14 +13,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(ApplicationException.class)
-  public ResponseEntity<ApiResponse<Object>>handleCustomException(ApplicationException ex) {
+  public ResponseEntity<ApiResponse<Object>> handleCustomException(ApplicationException ex) {
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
         .body(new ApiResponse<>(false, ex.getMessage(), null));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiResponse<Object>> handleValidationException(MethodArgumentNotValidException ex) {
+  public ResponseEntity<ApiResponse<Object>> handleValidationException(
+      MethodArgumentNotValidException ex) {
     String errorMessage = ex.getBindingResult().getFieldErrors().stream()
         .map(DefaultMessageSourceResolvable::getDefaultMessage)
         .findFirst()
@@ -32,6 +33,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Object>> handleGeneralException(Exception ex) {
+    ex.printStackTrace();
     return ResponseEntity
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .body(new ApiResponse<>(false, "알 수 없는 오류가 발생했습니다.", null));

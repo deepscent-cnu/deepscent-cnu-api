@@ -5,7 +5,6 @@ import deepscent_cnu.deepscent_cnu_api.exception.MemberException;
 import deepscent_cnu.deepscent_cnu_api.util.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 public class AuthTokenInterceptor implements HandlerInterceptor {

@@ -34,6 +34,6 @@ public class InterceptorConfig implements WebMvcConfigurer {
         .addPathPatterns("/api/auth/withdraw");
 
     registry.addInterceptor(deepscentTokenInterceptor())
-        .addPathPatterns(InterceptorPath.CONTROL_FAN.getPath());
+        .addPathPatterns("/api/device/*/fragrance/fan-state");
   }
 }

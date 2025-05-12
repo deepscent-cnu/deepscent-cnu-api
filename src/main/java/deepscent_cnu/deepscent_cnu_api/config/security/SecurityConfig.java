@@ -19,7 +19,7 @@ public class SecurityConfig {
         .csrf(AbstractHttpConfigurer::disable)  // 개발 과정에서만 비활성
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/device/**").permitAll()
+            .requestMatchers("/api/device/**").permitAll()
             .anyRequest().authenticated()
         );
 
