@@ -1,22 +1,19 @@
 package deepscent_cnu.deepscent_cnu_api.fragrance.dto.external.deepscent;
 
-public record DeviceStateResponse(
-    Boolean power,
-    String color,
-    int bright,
-    int fan1,
-    int fan2,
-    int fan3,
-    int fan4,
-    Boolean turbo,
-    Interval interval
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record DeviceStateResponse(
+    CartridgeInfo cart1,
+    CartridgeInfo cart2,
+    CartridgeInfo cart3,
+    CartridgeInfo cart4
 ) {
 
-  public record Interval(
-      Boolean enable,
-      int running_time,
-      int rest_time
+  public record CartridgeInfo(
+      String serial,
+      int remain,
+      int time
   ) {
 
   }

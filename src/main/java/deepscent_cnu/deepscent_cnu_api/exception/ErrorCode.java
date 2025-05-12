@@ -6,7 +6,8 @@ public enum ErrorCode {
   INVALID_PASSWORD("비밀번호가 일치하지 않습니다."),
   INVALID_INPUT("입력값이 유효하지 않습니다."),
   TOKEN_REQUIRED("인증 토큰이 필요합니다."),
-  INVALID_TOKEN("유효하지 않은 토큰입니다.");
+  INVALID_TOKEN("유효하지 않은 토큰입니다."),
+  UNEXPECTED_ERROR("예상치 못한 오류가 발생하였습니다.");
 
   private final String message;
 
