@@ -39,7 +39,7 @@ public class AuthController {
 
   @DeleteMapping("/withdraw")
   public ResponseEntity<ApiResponse<Object>> withdraw(@AuthToken Member member) {
-    memberService.deleteMember(member.getUsername());
+    memberService.deleteMember(member.getId());
     return ResponseEntity.ok(new ApiResponse<>(true, "회원 탈퇴가 완료되었습니다.", null));
   }
 }

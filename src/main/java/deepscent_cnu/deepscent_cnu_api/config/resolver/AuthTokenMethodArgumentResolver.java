@@ -33,11 +33,11 @@ public class AuthTokenMethodArgumentResolver implements HandlerMethodArgumentRes
       WebDataBinderFactory binderFactory
   ) {
     HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-    String username = (String) request.getAttribute("memberUsername");
-    if (username == null) {
+    Long memberId = (Long) request.getAttribute("memberId");
+    if (memberId == null) {
       throw new MemberException(ErrorCode.TOKEN_REQUIRED);
     }
-    // username 으로 Member 엔티티 조회 후 반환
-    return memberService.findByUsername(username);
+    // memberId로 Member 엔티티 조회 후 반환
+    return memberService.findById(memberId);
   }
 }
