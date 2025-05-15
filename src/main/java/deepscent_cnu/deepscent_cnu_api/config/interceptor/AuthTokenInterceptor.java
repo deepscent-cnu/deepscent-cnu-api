@@ -30,9 +30,9 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
       throw new MemberException(ErrorCode.INVALID_TOKEN);
     }
 
-    // 토큰에서 꺼낸 사용자 이름(또는 ID)은 request 에 담아둠
-    String username = jwtTokenProvider.getUsername(token);
-    request.setAttribute("memberUsername", username);
+    // 토큰에서 꺼낸 사용자 ID를 request 에 담아둠
+    Long userId = jwtTokenProvider.getUserId(token);
+    request.setAttribute("memberId", userId);
     return true;
   }
 }
