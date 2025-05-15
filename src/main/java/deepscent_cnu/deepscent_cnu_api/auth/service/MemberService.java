@@ -45,7 +45,7 @@ public class MemberService {
     );
     Member savedMember = memberRepository.save(member);
 
-    String token = jwtTokenProvider.createToken(savedMember.getUsername());
+    String token = jwtTokenProvider.createToken(savedMember.getId());
     return new MemberResponse(
         savedMember.getId(),
         savedMember.getName(),
@@ -65,7 +65,7 @@ public class MemberService {
       throw new MemberException(ErrorCode.INVALID_PASSWORD);
     }
 
-    String token = jwtTokenProvider.createToken(member.getUsername());
+    String token = jwtTokenProvider.createToken(member.getId());
     return new MemberResponse(
         member.getId(),
         member.getName(),
@@ -77,15 +77,15 @@ public class MemberService {
   }
 
   @Transactional
-  public void deleteMember(String username) {
-    Member member = memberRepository.findByUsername(username)
+  public void deleteMember(Long id) {
+    Member member = memberRepository.findById(id)
         .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
     memberRepository.delete(member);
   }
 
   @Transactional(readOnly = true)
-  public Member findByUsername(String username) {
-    return memberRepository.findByUsername(username)
+  public Member findById(Long id) {
+    return memberRepository.findById(id)
         .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
   }
 }
