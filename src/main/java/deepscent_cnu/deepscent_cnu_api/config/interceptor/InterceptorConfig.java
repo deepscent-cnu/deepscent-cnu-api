@@ -32,8 +32,5 @@ public class InterceptorConfig implements WebMvcConfigurer {
 //        .excludePathPatterns("/api/auth/signup", "/api/auth/login");  // 회원가입 및 로그인 엔드포인트 제외
     registry.addInterceptor(authTokenInterceptor())
         .addPathPatterns("/api/auth/withdraw");
-
-    registry.addInterceptor(deepscentTokenInterceptor())
-        .addPathPatterns("/api/device/*/fragrance/fan-state");
   }
 }
