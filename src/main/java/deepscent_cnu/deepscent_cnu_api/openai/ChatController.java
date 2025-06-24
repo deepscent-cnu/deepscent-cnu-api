@@ -16,4 +16,9 @@ public class ChatController {
         return chatService.chat(userId, request.getUserMessage());
     }
 
+    //TEST용
+    @PostMapping("/api/chat1/{userId}")
+    public String chat1(@PathVariable Integer userId,@RequestBody ChatRequest request) {
+        return chatService.chat(userId, request.getUserMessage());
+    }
 }

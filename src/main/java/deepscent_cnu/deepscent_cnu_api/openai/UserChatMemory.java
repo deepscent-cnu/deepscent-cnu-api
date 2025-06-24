@@ -23,7 +23,7 @@ public class UserChatMemory {
     private Integer memoryId; // 사용자 구분 값
 
     private String role; // user / assistant
-
+    @Column(length = 2000)
     private String message;
 
     private LocalDateTime createdAt;
