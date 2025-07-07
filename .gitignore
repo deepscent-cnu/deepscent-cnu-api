@@ -39,6 +39,7 @@ out/
 ### Secret Config ###
 application-secret.properties
 application.properties
+./application-secret.properties
 
 ### macOS ###
 .DS_Store
