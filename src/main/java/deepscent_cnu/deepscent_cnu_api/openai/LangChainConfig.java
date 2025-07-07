@@ -15,30 +15,31 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class LangChainConfig {
 
-    private final PersistentChatMemoryStore chatMemoryStore;
+  private final PersistentChatMemoryStore chatMemoryStore;
 
-    @Value("${openai.api.key}")
-    private String OPEN_API_KEY;
-    @Bean
-    public ChatLanguageModel chatModel() {
-        return OpenAiChatModel.builder()
-                .apiKey(OPEN_API_KEY)
-                .modelName("gpt-4o-mini") // 16k 토큰 모델
-                .logRequests(true)
-                .logResponses(true)
-                .build();
-    }
+  @Value("${openai.api-key}")
+  private String OPEN_API_KEY;
 
-    @Bean
-    public Assistant assistant(ChatLanguageModel chatLanguageModel) {
-        return AiServices.builder(Assistant.class)
-                .chatLanguageModel(chatLanguageModel)
-                .chatMemoryProvider(id ->
-                        MessageWindowChatMemory.builder()
-                        .id(id)
-                        .maxMessages(50)
-                        .chatMemoryStore(chatMemoryStore)
-                        .build())
-                .build();
-    }
+  @Bean
+  public ChatLanguageModel chatModel() {
+    return OpenAiChatModel.builder()
+        .apiKey(OPEN_API_KEY)
+        .modelName("gpt-4o-mini") // 16k 토큰 모델
+        .logRequests(true)
+        .logResponses(true)
+        .build();
+  }
+
+  @Bean
+  public Assistant assistant(ChatLanguageModel chatLanguageModel) {
+    return AiServices.builder(Assistant.class)
+        .chatLanguageModel(chatLanguageModel)
+        .chatMemoryProvider(id ->
+            MessageWindowChatMemory.builder()
+                .id(id)
+                .maxMessages(50)
+                .chatMemoryStore(chatMemoryStore)
+                .build())
+        .build();
+  }
 }
