@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,11 +21,15 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
-        .csrf(AbstractHttpConfigurer::disable)  // 개발 과정에서만 비활성
+        .csrf(AbstractHttpConfigurer::disable)  // 개발 과정에서만 비활성화
+        .headers(headers -> headers.frameOptions(
+            FrameOptionsConfig::disable)) // h2 console이 iframe 기반이라서 필요
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/auth/**").permitAll()
             .requestMatchers("/api/device/**").permitAll()
             .requestMatchers("/api/stt/**").permitAll()
+            .requestMatchers("/api/normal-olfactory-training/**").permitAll()
+            .requestMatchers("/h2-console/**").permitAll()
             .anyRequest().authenticated()
         );
 
