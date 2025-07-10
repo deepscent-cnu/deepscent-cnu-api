@@ -34,8 +34,8 @@ public class OpenAiService {
   }
 
   public String getQuestion(String answer) throws JsonProcessingException {
-     return getResponseFromAi(answer + " 이건 사용자의 답변인데 이 답변과 자연스럽게 대화가 이어지도록"
-         + "질문을 만들어줘 ");
+    return getResponseFromAi(answer + " 이건 사용자의 답변인데 이 답변과 자연스럽게 대화가 이어지도록"
+        + "질문을 만들어줘 ");
   }
 
   public String getReport(String content) throws JsonProcessingException {

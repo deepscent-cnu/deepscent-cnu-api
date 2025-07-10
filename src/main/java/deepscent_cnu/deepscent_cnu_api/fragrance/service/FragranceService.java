@@ -5,10 +5,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import deepscent_cnu.deepscent_cnu_api.fragrance.dto.request.FanStateRequest;
 import deepscent_cnu.deepscent_cnu_api.fragrance.dto.response.CapsuleNamesResponse;
+import deepscent_cnu.deepscent_cnu_api.fragrance.dto.response.ScentOptionsResponse;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +31,32 @@ public class FragranceService {
   @Value("${deepscent.access-token}")
   private String deepscentAccessToken;
 
+  private static List<String> getScentOptionsFalse(String correctScentOption) {
+    List<String> scentOptionCandidates = Arrays.asList("백미밥", "참기름", "장미", "된장", "나프탈렌", "치약", "레몬",
+        "베르가못", "라벤더", "연탄", "허브", "청국장");
+    List<String> scentOptionCandidatesFiltered = new ArrayList<>();
+
+    for (String scentOptionCandidate : scentOptionCandidates) {
+      if (!scentOptionCandidate.equals(correctScentOption)) {
+        scentOptionCandidatesFiltered.add(scentOptionCandidate);
+      }
+    }
+
+    Set<Integer> selectedIndexes = new HashSet<>();
+    Random random = new Random();
+    while (selectedIndexes.size() < 3) {
+      int index = random.nextInt(scentOptionCandidatesFiltered.size());
+      selectedIndexes.add(index);
+    }
+
+    List<String> result = new ArrayList<>();
+    for (int idx : selectedIndexes) {
+      result.add(scentOptionCandidatesFiltered.get(idx));
+    }
+
+    return result;
+  }
+
   public CapsuleNamesResponse getCartridgeState(String deviceId) throws Exception {
     List<String> capsuleSerials = getCapsuleSerials(deviceId);
     List<String> capsuleNames = getCapsuleNames(capsuleSerials);
@@ -35,6 +66,23 @@ public class FragranceService {
         capsuleNames.get(1),
         capsuleNames.get(2),
         capsuleNames.get(3)
+    );
+  }
+
+  public ScentOptionsResponse getScentOptions(String deviceId, int round) throws Exception {
+    List<String> capsuleSerials = getCapsuleSerials(deviceId);
+    List<String> capsuleNames = getCapsuleNames(capsuleSerials);
+    String scentOptionTrue = capsuleNames.get(round - 1);
+
+    List<String> scentOptions = getScentOptionsFalse(scentOptionTrue);
+    scentOptions.add(new Random().nextInt(4), scentOptionTrue);
+
+    return new ScentOptionsResponse(
+        scentOptionTrue,
+        scentOptions.get(0),
+        scentOptions.get(1),
+        scentOptions.get(2),
+        scentOptions.get(3)
     );
   }
 

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class WhisperProperties {
+
   private String apiKey;
   private String whisperUrl;
 }

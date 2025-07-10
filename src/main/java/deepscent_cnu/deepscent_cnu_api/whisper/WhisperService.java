@@ -32,7 +32,8 @@ public class WhisperService {
     post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey);
 
     MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-    builder.addBinaryBody("file", file.getBytes(), ContentType.DEFAULT_BINARY, file.getOriginalFilename());
+    builder.addBinaryBody("file", file.getBytes(), ContentType.DEFAULT_BINARY,
+        file.getOriginalFilename());
     builder.addTextBody("model", "whisper-1");
     builder.addTextBody("language", "ko");
 

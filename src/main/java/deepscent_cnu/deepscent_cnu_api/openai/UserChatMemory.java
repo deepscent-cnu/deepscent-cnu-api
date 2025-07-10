@@ -1,12 +1,16 @@
 package deepscent_cnu.deepscent_cnu_api.openai;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_chat_memory")
@@ -16,15 +20,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UserChatMemory {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private Integer memoryId; // 사용자 구분 값
+  private Integer memoryId; // 사용자 구분 값
 
-    private String role; // user / assistant
-    @Column(length = 2000)
-    private String message;
+  private String role; // user / assistant
+  @Column(length = 2000)
+  private String message;
 
-    private LocalDateTime createdAt;
+  private LocalDateTime createdAt;
 }
