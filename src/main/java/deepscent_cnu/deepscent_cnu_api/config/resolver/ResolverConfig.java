@@ -16,10 +16,6 @@ public class ResolverConfig implements WebMvcConfigurer {
     this.memberService = memberService;
   }
 
-  @Bean
-  public DeepscentTokenMethodArgumentResolver deepscentTokenMethodArgumentResolver() {
-    return new DeepscentTokenMethodArgumentResolver();
-  }
 
   @Bean
   public AuthTokenMethodArgumentResolver authTokenMethodArgumentResolver() {
@@ -28,9 +24,6 @@ public class ResolverConfig implements WebMvcConfigurer {
 
   @Override
   public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-    // DeepScent 토큰 리졸버
-    resolvers.add(deepscentTokenMethodArgumentResolver());
-    // 회원 인증용 AuthToken 리졸버
     resolvers.add(authTokenMethodArgumentResolver());
   }
 }
