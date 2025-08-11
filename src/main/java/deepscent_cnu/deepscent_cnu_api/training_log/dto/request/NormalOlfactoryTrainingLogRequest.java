@@ -12,7 +12,8 @@ public record NormalOlfactoryTrainingLogRequest(
       String correctOption,
       String selectedOption,
       Boolean isCorrect,
-      Long timeTaken
+      Long timeTaken,
+      Integer scentStrength
   ) {
 
   }
