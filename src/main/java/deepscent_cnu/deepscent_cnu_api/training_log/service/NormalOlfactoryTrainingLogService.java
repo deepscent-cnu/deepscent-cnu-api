@@ -32,7 +32,7 @@ public class NormalOlfactoryTrainingLogService {
       NormalOlfactoryTrainingRoundLog roundLog = new NormalOlfactoryTrainingRoundLog(
           createdTrainingLog, round, roundLogRequest.correctOption(),
           roundLogRequest.selectedOption(), roundLogRequest.isCorrect(),
-          roundLogRequest.timeTaken());
+          roundLogRequest.timeTaken(), roundLogRequest.scentStrength());
 
       roundLogRepository.save(roundLog);
     }

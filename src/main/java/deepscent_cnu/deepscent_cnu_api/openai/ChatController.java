@@ -15,13 +15,13 @@ public class ChatController {
   private final ChatService chatService;
 
   @PostMapping("/api/chat/{userId}")
-  public String chat(@PathVariable Integer userId, @RequestBody ChatRequest request) {
+  public String chat(@PathVariable("userId") Integer userId, @RequestBody ChatRequest request) {
     return chatService.chat(userId, request.getUserMessage());
   }
 
   //TEST용
   @PostMapping("/api/chat1/{userId}")
-  public String chat1(@PathVariable Integer userId, @RequestBody ChatRequest request) {
+  public String chat1(@PathVariable("userId") Integer userId, @RequestBody ChatRequest request) {
     return chatService.chat(userId, request.getUserMessage());
   }
 }
