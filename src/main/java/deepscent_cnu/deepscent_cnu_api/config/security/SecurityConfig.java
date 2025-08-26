@@ -24,7 +24,8 @@ public class SecurityConfig {
     http
         .cors(Customizer.withDefaults())
         .csrf(AbstractHttpConfigurer::disable)// 개발 과정에서만 비활성화
-        .headers(headers -> headers.frameOptions(FrameOptionsConfig::disable))// h2 console이 iframe 기반이라서 필요
+        .headers(headers -> headers.frameOptions(
+            FrameOptionsConfig::disable))// h2 console이 iframe 기반이라서 필요
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/auth/**").permitAll()
             .requestMatchers("/api/device/**").permitAll()
