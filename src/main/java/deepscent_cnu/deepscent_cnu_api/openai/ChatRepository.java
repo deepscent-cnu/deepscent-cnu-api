@@ -1,9 +1,10 @@
 package deepscent_cnu.deepscent_cnu_api.openai;
 
 import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface MemoryRecallRoundRepository extends JpaRepository<MemoryRecallRound, Long> {
+public interface ChatRepository extends JpaRepository<MemoryRecallRound, Long> {
 
-  MemoryRecallRound findByMemberAndAndRound(Member member, Long roundId);
+  List<MemoryRecallRound> findAllByMember(Member member);
 }

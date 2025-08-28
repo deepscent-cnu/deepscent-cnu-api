@@ -10,9 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -29,7 +26,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
 
   @Override
   public List<ChatMessage> getMessages(Object roundId) {
-      roundId = (Long) roundId;
+    roundId = (Long) roundId;
     MemoryRecallRound memberRecallRound = memoryRecallRoundRepository.findById((Long) roundId)
         .orElseThrow(() -> new IllegalArgumentException("Invalid memoryId: "));
     return repository.findByMemoryRecallRoundOrderByCreatedAtAsc(memberRecallRound)
@@ -58,11 +55,12 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
     String scent = "참기름향기"; // 향기 이름을 여기에 지정하세요. 예: "장미", "바닐라" 등
 
     // 1. 기존 메시지 조회
-    List<UserChatMemory> existingMessages = repository.findByMemoryRecallRoundOrderByCreatedAtAsc(memoryRecallRound);
+    List<UserChatMemory> existingMessages = repository.findByMemoryRecallRoundOrderByCreatedAtAsc(
+        memoryRecallRound);
     if (existingMessages.isEmpty()) {
       UserChatMemory systemMessage = UserChatMemory.builder()
 //          .memoryId(id)
-              .memoryRecallRound(memoryRecallRound)
+          .memoryRecallRound(memoryRecallRound)
           .role("SYSTEM")
           .message(
               """
@@ -128,7 +126,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
           return UserChatMemory.builder()
 //              .memoryId(id)
               .role(role)
-                  .memoryRecallRound(memoryRecallRound)
+              .memoryRecallRound(memoryRecallRound)
               .message(content)
               .createdAt(LocalDateTime.now()) // 실제 상황에서는 시간 보정 필요
               .build();

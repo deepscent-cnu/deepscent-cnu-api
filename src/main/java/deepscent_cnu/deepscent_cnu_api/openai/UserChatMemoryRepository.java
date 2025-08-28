@@ -5,7 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserChatMemoryRepository extends JpaRepository<UserChatMemory, Long> {
 
-  List<UserChatMemory> findByMemoryRecallRoundOrderByCreatedAtAsc( MemoryRecallRound memoryRecallRound);
+  List<UserChatMemory> findByMemoryRecallRoundOrderByCreatedAtAsc(
+      MemoryRecallRound memoryRecallRound);
+
   void deleteByMemoryRecallRound(MemoryRecallRound memoryRecallRound);
 
   void deleteByMemoryId(MemoryRecallRound memoryRecallRound);
