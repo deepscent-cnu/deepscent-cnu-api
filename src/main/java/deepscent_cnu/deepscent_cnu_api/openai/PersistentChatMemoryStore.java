@@ -22,10 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class PersistentChatMemoryStore implements ChatMemoryStore {
 
   private final UserChatMemoryRepository repository;
+  private final MemoryRecallRoundRepository memoryRecallRoundRepository;
 
   @Override
-  public List<ChatMessage> getMessages(Object memoryId) {
-    return repository.findByMemoryIdOrderByCreatedAtAsc((Integer) memoryId)
+  public List<ChatMessage> getMessages(Object roundId) {
+    roundId = (Long) roundId;
+    MemoryRecallRound memberRecallRound = memoryRecallRoundRepository.findById((Long) roundId)
+        .orElseThrow(() -> new IllegalArgumentException("Invalid memoryId: "));
+    return repository.findByMemoryRecallRoundOrderByCreatedAtAsc(memberRecallRound)
         .stream()
         .map(entity -> {
           switch (entity.getRole()) {
@@ -44,15 +48,19 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
   }
 
   @Override
-  public void updateMessages(Object memoryId, List<ChatMessage> newMessages) {
-    Integer id = (Integer) memoryId;
+  public void updateMessages(Object roundId, List<ChatMessage> newMessages) {
+    Long id = (Long) roundId;
+    MemoryRecallRound memoryRecallRound = memoryRecallRoundRepository.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Invalid memoryId: " + id));
     String scent = "참기름향기"; // 향기 이름을 여기에 지정하세요. 예: "장미", "바닐라" 등
 
     // 1. 기존 메시지 조회
-    List<UserChatMemory> existingMessages = repository.findByMemoryIdOrderByCreatedAtAsc(id);
+    List<UserChatMemory> existingMessages = repository.findByMemoryRecallRoundOrderByCreatedAtAsc(
+        memoryRecallRound);
     if (existingMessages.isEmpty()) {
       UserChatMemory systemMessage = UserChatMemory.builder()
-          .memoryId(id)
+//          .memoryId(id)
+          .memoryRecallRound(memoryRecallRound)
           .role("SYSTEM")
           .message(
               """
@@ -62,10 +70,10 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
                   - 향기 자극을 바탕으로 사용자의 감각 경험, 감정 반응, 자서전적 기억을 자연스럽게 이끌어냅니다.
                   - 매 단계별 응답에 감정적으로 공감하며, 친근하고 따뜻한 어조를 유지합니다.
                   - 질문은 매번 새롭게 생성하되, 사용자 응답을 바탕으로 자연스럽게 이어지도록 구성합니다.
-                  - 후속 질문은 **최대 2회**까지만 허용하고, 이후 **요약 및 종료 멘트**로 마무리합니다.
+                  - 후속 질문은 **최대 9회**까지만 허용하고, 이후 **요약 및 종료 멘트**로 마무리합니다.
                                       
                   대화 흐름:
-                  1. 향기 인식 → 감정 반응 → 기억 회상 → 후속 질문 1 → 후속 질문 2 → 요약 및 종료
+                  1. 향기 인식 → 감정 반응 → 기억 회상 → 후속 질문 → 요약 및 종료
                   예시 질문 흐름 (단 고정된 문장은 아님):
                   - “방금 맡은 냄새는 어떤 느낌이 드셨나요?”
                   - “그 향기를 맡았을 때 기분은 어떠셨어요?”
@@ -74,7 +82,6 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
                   - [기억 없음 시] “혹시 시장이나 시골집, 학교 같은 공간이 생각나시나요?”
                   요약 및 종료 멘트 예시:
                   - “오늘은 [누구와], [어디서], [언제쯤] 있었던 추억을 떠올리셨습니다.”
-                  - “이 회상이 오늘 당신의 마음에 따뜻한 울림이 되었기를 바랍니다.”
                   - “오늘의 회상은 여기까지입니다. 다음에 또 뵙겠습니다. 🌿”
                   유의사항:
                   - 질문은 너무 길거나 반복적이지 않도록 합니다.
@@ -117,8 +124,9 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
           }
 
           return UserChatMemory.builder()
-              .memoryId(id)
+//              .memoryId(id)
               .role(role)
+              .memoryRecallRound(memoryRecallRound)
               .message(content)
               .createdAt(LocalDateTime.now()) // 실제 상황에서는 시간 보정 필요
               .build();
@@ -134,6 +142,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
 
   @Override
   public void deleteMessages(Object memoryId) {
-    repository.deleteByMemoryId((Integer) memoryId);
+
+    repository.deleteByMemoryId((MemoryRecallRound) memoryId);
   }
 }

@@ -16,8 +16,9 @@ public class ChatService {
 
   private final ChatRepository chatRepository;
 
-  public String chat(Integer userId, String userMessage) {
-    return assistant.chat(userId, userMessage);
+  public String chat(Long roundId, String userMessage) {
+
+    return assistant.chat(roundId, userMessage);
   }
 
   public LastRoundResponse getRoundList(Member member) {
@@ -25,7 +26,7 @@ public class ChatService {
     int lastRound = 0;
 
     for (MemoryRecallRound memoryRecallRound : memoryRecallRoundList) {
-      int round = memoryRecallRound.getRound();
+      int round = memoryRecallRound.getRound().intValue();
       lastRound = Math.max(lastRound, round);
     }
 
