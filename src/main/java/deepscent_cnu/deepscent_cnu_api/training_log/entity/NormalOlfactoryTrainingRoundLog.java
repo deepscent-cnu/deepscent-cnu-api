@@ -34,13 +34,17 @@ public class NormalOlfactoryTrainingRoundLog {
   @Column(nullable = false)
   private Long timeTaken;
 
+  @Column(nullable = false)
+  private Integer scentStrength;
+
   public NormalOlfactoryTrainingRoundLog(NormalOlfactoryTrainingLog trainingLog, Integer round,
-      String correctOption, String selectedOption, Boolean isCorrect, Long timeTaken) {
+      String correctOption, String selectedOption, Boolean isCorrect, Long timeTaken, Integer scentStrength) {
     this.trainingLog = trainingLog;
     this.round = round;
     this.correctOption = correctOption;
     this.selectedOption = selectedOption;
     this.isCorrect = isCorrect;
     this.timeTaken = timeTaken;
+    this.scentStrength = scentStrength;
   }
 }
