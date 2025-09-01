@@ -31,32 +31,6 @@ public class FragranceService {
   @Value("${deepscent.access-token}")
   private String deepscentAccessToken;
 
-  private static List<String> getScentOptionsFalse(String correctScentOption) {
-    List<String> scentOptionCandidates = Arrays.asList("백미밥", "참기름", "장미", "된장", "나프탈렌", "치약", "레몬",
-        "베르가못", "라벤더", "연탄", "허브", "청국장");
-    List<String> scentOptionCandidatesFiltered = new ArrayList<>();
-
-    for (String scentOptionCandidate : scentOptionCandidates) {
-      if (!scentOptionCandidate.equals(correctScentOption)) {
-        scentOptionCandidatesFiltered.add(scentOptionCandidate);
-      }
-    }
-
-    Set<Integer> selectedIndexes = new HashSet<>();
-    Random random = new Random();
-    while (selectedIndexes.size() < 3) {
-      int index = random.nextInt(scentOptionCandidatesFiltered.size());
-      selectedIndexes.add(index);
-    }
-
-    List<String> result = new ArrayList<>();
-    for (int idx : selectedIndexes) {
-      result.add(scentOptionCandidatesFiltered.get(idx));
-    }
-
-    return result;
-  }
-
   public CapsuleNamesResponse getCartridgeState(String deviceId) throws Exception {
     List<String> capsuleSerials = getCapsuleSerials(deviceId);
     List<String> capsuleNames = getCapsuleNames(capsuleSerials);
@@ -141,5 +115,31 @@ public class FragranceService {
     }
 
     return capsuleSerials;
+  }
+
+  private static List<String> getScentOptionsFalse(String correctScentOption) {
+    List<String> scentOptionCandidates = Arrays.asList("백미밥", "참기름", "장미", "된장", "나프탈렌", "치약", "레몬",
+        "베르가못", "라벤더", "연탄", "허브", "청국장");
+    List<String> scentOptionCandidatesFiltered = new ArrayList<>();
+
+    for (String scentOptionCandidate : scentOptionCandidates) {
+      if (!scentOptionCandidate.equals(correctScentOption)) {
+        scentOptionCandidatesFiltered.add(scentOptionCandidate);
+      }
+    }
+
+    Set<Integer> selectedIndexes = new HashSet<>();
+    Random random = new Random();
+    while (selectedIndexes.size() < 3) {
+      int index = random.nextInt(scentOptionCandidatesFiltered.size());
+      selectedIndexes.add(index);
+    }
+
+    List<String> result = new ArrayList<>();
+    for (int idx : selectedIndexes) {
+      result.add(scentOptionCandidatesFiltered.get(idx));
+    }
+
+    return result;
   }
 }

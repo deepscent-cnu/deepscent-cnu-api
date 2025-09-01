@@ -31,6 +31,13 @@ public class GlobalExceptionHandler {
         .body(new ApiResponse<>(false, errorMessage, null));
   }
 
+  @ExceptionHandler(value = IllegalArgumentException.class)
+  public ResponseEntity<ExceptionResponse> handleIllegalArgumentException(
+      IllegalArgumentException e) {
+    ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
+    return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Object>> handleGeneralException(Exception ex) {
     ex.printStackTrace();
