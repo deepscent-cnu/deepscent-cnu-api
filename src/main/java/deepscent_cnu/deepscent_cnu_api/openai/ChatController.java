@@ -39,7 +39,8 @@ public class ChatController {
   //해당 회차 대화 시작
   //회차 시작하고 향기를 선택한 후 호출
   @PostMapping("/api/chat/{userId}/{roundId}")
-  public MemoryRecallRound startChat(@PathVariable(name = "userId") Long userId, @PathVariable(name = "roundId") Long roundId,
+  public MemoryRecallRound startChat(@PathVariable(name = "userId") Long userId,
+      @PathVariable(name = "roundId") Long roundId,
       @RequestParam(name = "scent") String scent) {
 
     Optional<Member> member = memberRepository.findById(userId);
@@ -63,7 +64,8 @@ public class ChatController {
 
   //해당 회차 대화 내용 저장
   @PostMapping("/api/chat1/{roundId}")
-  public String chat2(@PathVariable(name = "roundId") Long roundId, @RequestBody ChatRequest1 request) {
+  public String chat2(@PathVariable(name = "roundId") Long roundId,
+      @RequestBody ChatRequest1 request) {
     // 회차 id 저
     return chatService.chat(roundId, request.getUserMessage());
   }

@@ -5,6 +5,8 @@ import deepscent_cnu.deepscent_cnu_api.auth.dto.MemberResponse;
 import deepscent_cnu.deepscent_cnu_api.auth.dto.SignupRequest;
 import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
 import deepscent_cnu.deepscent_cnu_api.auth.repository.MemberRepository;
+import deepscent_cnu.deepscent_cnu_api.device_info.entity.DeviceInfo;
+import deepscent_cnu.deepscent_cnu_api.device_info.repository.DeviceRegisterRepository;
 import deepscent_cnu.deepscent_cnu_api.exception.ErrorCode;
 import deepscent_cnu.deepscent_cnu_api.exception.MemberException;
 import deepscent_cnu.deepscent_cnu_api.util.JwtTokenProvider;
@@ -18,13 +20,16 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
+  private final DeviceRegisterRepository deviceRegisterRepository;
 
   public MemberService(
       MemberRepository memberRepository,
+      DeviceRegisterRepository deviceRegisterRepository,
       PasswordEncoder passwordEncoder,
       JwtTokenProvider jwtTokenProvider
   ) {
     this.memberRepository = memberRepository;
+    this.deviceRegisterRepository = deviceRegisterRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtTokenProvider = jwtTokenProvider;
   }
@@ -44,6 +49,8 @@ public class MemberService {
         passwordEncoder.encode(request.password())
     );
     Member savedMember = memberRepository.save(member);
+
+    deviceRegisterRepository.save(new DeviceInfo(member));
 
     String token = jwtTokenProvider.createToken(savedMember.getId());
     return new MemberResponse(
