@@ -8,6 +8,7 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +53,11 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
     Long id = (Long) roundId;
     MemoryRecallRound memoryRecallRound = memoryRecallRoundRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Invalid memoryId: " + id));
-    String scent = "참기름향기"; // 향기 이름을 여기에 지정하세요. 예: "장미", "바닐라" 등
+//    String scent = "참기름향기"; // 향기 이름을 여기에 지정하세요. 예: "장미", "바닐라" 등
+    // DB에 저장된 향기 사용
+    String scent = Optional.ofNullable(memoryRecallRound.getScent())
+        .filter(s -> !s.isBlank())
+        .orElse("라벤더"); // fallback
 
     // 1. 기존 메시지 조회
     List<UserChatMemory> existingMessages = repository.findByMemoryRecallRoundOrderByCreatedAtAsc(
