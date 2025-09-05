@@ -2,6 +2,7 @@ package deepscent_cnu.deepscent_cnu_api.exception;
 
 
 import deepscent_cnu.deepscent_cnu_api.util.ApiResponse;
+import java.util.NoSuchElementException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,20 @@ public class GlobalExceptionHandler {
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
         .body(new ApiResponse<>(false, errorMessage, null));
+  }
+
+  @ExceptionHandler(value = IllegalArgumentException.class)
+  public ResponseEntity<ExceptionResponse> handleIllegalArgumentException(
+      IllegalArgumentException e) {
+    ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
+    return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(value = NoSuchElementException.class)
+  public ResponseEntity<ExceptionResponse> handleNoSuchElementException(
+      NoSuchElementException e) {
+    ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
+    return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(Exception.class)

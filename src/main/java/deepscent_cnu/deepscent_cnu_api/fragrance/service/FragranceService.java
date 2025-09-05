@@ -3,8 +3,16 @@ package deepscent_cnu.deepscent_cnu_api.fragrance.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
+import deepscent_cnu.deepscent_cnu_api.config.resolver.AuthToken;
+import deepscent_cnu.deepscent_cnu_api.device_info.entity.DeviceInfo;
+import deepscent_cnu.deepscent_cnu_api.device_info.repository.DeviceRegisterRepository;
+import deepscent_cnu.deepscent_cnu_api.fragrance.dto.request.CorrectOptionRequest;
 import deepscent_cnu.deepscent_cnu_api.fragrance.dto.request.FanStateRequest;
-import deepscent_cnu.deepscent_cnu_api.fragrance.dto.response.CapsuleNamesResponse;
+import deepscent_cnu.deepscent_cnu_api.fragrance.dto.response.CapsuleInfo;
+import deepscent_cnu.deepscent_cnu_api.fragrance.dto.response.CapsuleInfoResponse;
+import deepscent_cnu.deepscent_cnu_api.fragrance.dto.response.CorrectScent;
+import deepscent_cnu.deepscent_cnu_api.fragrance.dto.response.CorrectScentListResponse;
 import deepscent_cnu.deepscent_cnu_api.fragrance.dto.response.ScentOptionsResponse;
 import java.net.URI;
 import java.util.ArrayList;
@@ -12,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,49 +39,61 @@ public class FragranceService {
   private final ObjectMapper objectMapper = new ObjectMapper();
   @Value("${deepscent.access-token}")
   private String deepscentAccessToken;
+  private DeviceRegisterRepository deviceRegisterRepository;
 
-  private static List<String> getScentOptionsFalse(String correctScentOption) {
-    List<String> scentOptionCandidates = Arrays.asList("백미밥", "참기름", "장미", "된장", "나프탈렌", "치약", "레몬",
-        "베르가못", "라벤더", "연탄", "허브", "청국장");
-    List<String> scentOptionCandidatesFiltered = new ArrayList<>();
+  public FragranceService(DeviceRegisterRepository deviceRegisterRepository) {
+    this.deviceRegisterRepository = deviceRegisterRepository;
+  }
 
-    for (String scentOptionCandidate : scentOptionCandidates) {
-      if (!scentOptionCandidate.equals(correctScentOption)) {
-        scentOptionCandidatesFiltered.add(scentOptionCandidate);
+  public CapsuleInfoResponse getCartridgeState(@AuthToken Member member) throws Exception {
+    List<String> deviceIds = getDeviceIds(member);
+    List<CapsuleInfo> capsuleInfoList = new ArrayList<>();
+
+    for (int idx = 0; idx < deviceIds.size(); idx++) {
+      List<String> capsuleSerials = getCapsuleSerials(deviceIds.get(idx));
+      List<String> capsuleNameList = getCapsuleNames(capsuleSerials);
+
+      for (int fanNumber = 1; fanNumber <= 4; fanNumber++) {
+        capsuleInfoList.add(
+            new CapsuleInfo(capsuleNameList.get(fanNumber - 1), idx + 1, fanNumber));
+      }
+    }
+
+    return new CapsuleInfoResponse(capsuleInfoList);
+  }
+
+  public CorrectScentListResponse getCorrectScentList(@AuthToken Member member) throws Exception {
+    List<String> deviceIds = getDeviceIds(member);
+    List<CorrectScent> candidates = new ArrayList<>();
+
+    for (int idx = 0; idx < deviceIds.size(); idx++) {
+      String deviceId = deviceIds.get(idx);
+      List<String> capsuleSerials = getCapsuleSerials(deviceId);
+      List<String> capsuleNameList = getCapsuleNames(capsuleSerials);
+
+      for (int fanNumber = 1; fanNumber <= 4; fanNumber++) {
+        candidates.add(new CorrectScent(capsuleNameList.get(fanNumber - 1), idx + 1, fanNumber));
       }
     }
 
     Set<Integer> selectedIndexes = new HashSet<>();
     Random random = new Random();
-    while (selectedIndexes.size() < 3) {
-      int index = random.nextInt(scentOptionCandidatesFiltered.size());
+    while (selectedIndexes.size() < 4) {
+      int index = random.nextInt(candidates.size());
       selectedIndexes.add(index);
     }
 
-    List<String> result = new ArrayList<>();
+    List<CorrectScent> correctScentList = new ArrayList<>();
     for (int idx : selectedIndexes) {
-      result.add(scentOptionCandidatesFiltered.get(idx));
+      correctScentList.add(candidates.get(idx));
     }
 
-    return result;
+    return new CorrectScentListResponse(correctScentList);
   }
 
-  public CapsuleNamesResponse getCartridgeState(String deviceId) throws Exception {
-    List<String> capsuleSerials = getCapsuleSerials(deviceId);
-    List<String> capsuleNames = getCapsuleNames(capsuleSerials);
-
-    return new CapsuleNamesResponse(
-        capsuleNames.get(0),
-        capsuleNames.get(1),
-        capsuleNames.get(2),
-        capsuleNames.get(3)
-    );
-  }
-
-  public ScentOptionsResponse getScentOptions(String deviceId, int round) throws Exception {
-    List<String> capsuleSerials = getCapsuleSerials(deviceId);
-    List<String> capsuleNames = getCapsuleNames(capsuleSerials);
-    String scentOptionTrue = capsuleNames.get(round - 1);
+  public ScentOptionsResponse getScentOptions(CorrectOptionRequest correctOptionRequest)
+      throws Exception {
+    String scentOptionTrue = correctOptionRequest.correctOption();
 
     List<String> scentOptions = getScentOptionsFalse(scentOptionTrue);
     scentOptions.add(new Random().nextInt(4), scentOptionTrue);
@@ -86,8 +107,11 @@ public class FragranceService {
     );
   }
 
-  public void patchDeviceState(String deviceId, FanStateRequest fanStateRequest) {
-    String target_uri = DEEPSCENT_BASE_URL + "/api/device/" + deviceId + "/state";
+  public void patchDeviceState(Member member, FanStateRequest fanStateRequest) {
+    List<String> deviceIds = getDeviceIds(member);
+    String targetDeviceId = deviceIds.get(fanStateRequest.deviceNumber() - 1);
+
+    String target_uri = DEEPSCENT_BASE_URL + "/api/device/" + targetDeviceId + "/state";
     Map<String, Object> payload = Map.of("fan" + fanStateRequest.fanNumber(),
         fanStateRequest.fanSpeed());
 
@@ -141,5 +165,40 @@ public class FragranceService {
     }
 
     return capsuleSerials;
+  }
+
+  private List<String> getDeviceIds(Member member) {
+    DeviceInfo deviceInfo = deviceRegisterRepository.findByMember(member)
+        .orElseThrow(() -> new NoSuchElementException("유저 상태가 올바르지 않습니다."));
+
+    return List.of(deviceInfo.getDeviceId1(), deviceInfo.getDeviceId2(),
+        deviceInfo.getDeviceId3());
+  }
+
+  private List<String> getScentOptionsFalse(String correctScentOption) {
+    List<String> scentOptionCandidates = Arrays.asList("백미밥", "참기름", "장미", "된장", "나프탈렌", "치약", "레몬",
+        "베르가못", "라벤더", "연탄", "허브", "청국장", "인센스", "파인", "고추장", "커피", "잡곡밥", "체리", "오렌지", "로즈마리",
+        "버베나", "샌달우드", "네롤리", "라일락", "베티버", "앰버", "머스크");
+    List<String> scentOptionCandidatesFiltered = new ArrayList<>();
+
+    for (String scentOptionCandidate : scentOptionCandidates) {
+      if (!scentOptionCandidate.equals(correctScentOption)) {
+        scentOptionCandidatesFiltered.add(scentOptionCandidate);
+      }
+    }
+
+    Set<Integer> selectedIndexes = new HashSet<>();
+    Random random = new Random();
+    while (selectedIndexes.size() < 3) {
+      int index = random.nextInt(scentOptionCandidatesFiltered.size());
+      selectedIndexes.add(index);
+    }
+
+    List<String> result = new ArrayList<>();
+    for (int idx : selectedIndexes) {
+      result.add(scentOptionCandidatesFiltered.get(idx));
+    }
+
+    return result;
   }
 }
