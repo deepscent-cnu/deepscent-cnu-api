@@ -5,6 +5,7 @@ import deepscent_cnu.deepscent_cnu_api.config.resolver.AuthToken;
 import deepscent_cnu.deepscent_cnu_api.device_info.dto.request.DeviceRegisterRequest;
 import deepscent_cnu.deepscent_cnu_api.device_info.dto.response.DeviceInfoResponse;
 import deepscent_cnu.deepscent_cnu_api.device_info.service.DeviceRegisterService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,7 @@ public class DeviceRegisterController {
 
   @PostMapping("/register")
   public ResponseEntity<Void> registerDeviceId(@AuthToken Member member,
-      @RequestBody DeviceRegisterRequest deviceRegisterRequest) {
+      @Valid @RequestBody DeviceRegisterRequest deviceRegisterRequest) {
     deviceRegisterService.registerDeviceId(member, deviceRegisterRequest);
     return ResponseEntity.noContent().build();
   }
