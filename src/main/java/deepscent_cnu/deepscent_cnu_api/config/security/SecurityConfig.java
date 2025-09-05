@@ -33,6 +33,7 @@ public class SecurityConfig {
             .requestMatchers("/api/chat/**").permitAll()
             .requestMatchers("/api/chat1/**").permitAll()
             .requestMatchers("/api/normal-olfactory-training/**").permitAll()
+            .requestMatchers("/api/memory-recall-training/log/**").permitAll()
             .requestMatchers("/h2-console/**").permitAll()
             .anyRequest().authenticated()
         );
