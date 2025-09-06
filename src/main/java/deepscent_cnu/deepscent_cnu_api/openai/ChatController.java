@@ -40,14 +40,14 @@ public class ChatController {
 
   //해당 회차 대화 시작
   //회차 시작하고 향기를 선택한 후 호출
-  @PostMapping("/api/chat/{userId}/{roundId}")
-  public MemoryRecallRound startChat(@PathVariable(name = "userId") Long userId,
+  @PostMapping("/api/chat/start/{roundId}")
+  public MemoryRecallRound startChat(@AuthToken Member member,
       @PathVariable(name = "roundId") Long roundId,
       @RequestParam(name = "scent") String scent) {
 
-    Optional<Member> member = memberRepository.findById(userId);
+
     MemoryRecallRound byMemberAndAndRound = memoryRecallRoundRepository.findByMemberAndAndRound(
-        member.get(), roundId);
+        member, roundId);
     if (byMemberAndAndRound != null) {
       // 자식만 삭제
       userChatMemoryRepository.deleteByMemoryRecallRound(byMemberAndAndRound);
@@ -55,7 +55,7 @@ public class ChatController {
 
     } else {
       MemoryRecallRound memoryRecallRound1 = new MemoryRecallRound();
-      memoryRecallRound1.setMember(member.get());
+      memoryRecallRound1.setMember(member);
       memoryRecallRound1.setRound(roundId);
       memoryRecallRound1.setCreatedAt(java.time.LocalDateTime.now());
       memoryRecallRound1.setScent(scent);
@@ -65,7 +65,7 @@ public class ChatController {
   }
 
   //해당 회차 대화 내용 저장
-  @PostMapping("/api/chat1/{roundId}")
+  @PostMapping("/api/chat/{roundId}")
   public String chat2(@PathVariable(name = "roundId") Long roundId,
       @RequestBody ChatRequest1 request) {
     // 회차 id 저
@@ -112,11 +112,22 @@ public class ChatController {
 
   //느낌저장하기
   @PostMapping("/api/chat/feeling/{roundId}")
-  public void saveFeeling(@PathVariable(name = "roundId") Long roundId,
+  public void saveFeeling(@PathVariable(name = "roundId") Long roundId,@AuthToken Member member,
       @RequestParam String feeling) {
-    MemoryRecallRound memoryRecallRound = memoryRecallRoundRepository.findById(roundId)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid roundId: " + roundId));
+    MemoryRecallRound memoryRecallRound = memoryRecallRoundRepository.findByMemberAndAndRound(member,roundId);
     memoryRecallRound.setFeeling(feeling);
     memoryRecallRoundRepository.save(memoryRecallRound);
+  }
+  //종료된 회차 라운드 불러오기
+  @GetMapping("/api/chat/read/{roundId}")
+  public MemoryRecallRound getCompletedRound(@AuthToken Member member,
+      @PathVariable(name = "roundId") Long roundId) {
+    MemoryRecallRound byMemberAndAndRound = memoryRecallRoundRepository.findByMemberAndAndRound(
+        member, roundId);
+    if (byMemberAndAndRound != null) {
+      return byMemberAndAndRound;
+    } else {
+      throw new IllegalArgumentException("Invalid userId or roundId");
+    }
   }
 }
