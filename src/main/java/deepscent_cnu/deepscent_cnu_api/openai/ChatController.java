@@ -4,6 +4,7 @@ import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
 import deepscent_cnu.deepscent_cnu_api.auth.repository.MemberRepository;
 import deepscent_cnu.deepscent_cnu_api.config.resolver.AuthToken;
 import deepscent_cnu.deepscent_cnu_api.openai.dto.response.LastRoundResponse;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ public class ChatController {
   private final MemoryRecallRoundRepository memoryRecallRoundRepository;
   private final MemberRepository memberRepository;
   private final UserChatMemoryRepository userChatMemoryRepository;
+  private final LlmConversationSummarizer llmConversationSummarizer;
 
   //  @PostMapping("/api/chat/{userId}")
 //  public String chat(@PathVariable Integer userId, @RequestBody ChatRequest request) {
@@ -73,5 +75,48 @@ public class ChatController {
   @GetMapping("/api/chat/last-round")
   public ResponseEntity<LastRoundResponse> getRoundList(@AuthToken Member member) {
     return ResponseEntity.ok().body(chatService.getRoundList(member));
+  }
+
+  //저장하기를 누르면 해당 값이 저장(여기서 roundId는 단순 회차 값이 아니라 )
+  @PostMapping("/api/chat/summary/{roundId}")
+  public void saveSummary(@PathVariable(name = "roundId") Long roundId) {
+    MemoryRecallRound memoryRecallRound = memoryRecallRoundRepository.findById(roundId)
+        .orElseThrow(() -> new IllegalArgumentException("Invalid roundId: " + roundId));
+
+    List<String> userOnly = userChatMemoryRepository.findUserMessagesTextByRound(memoryRecallRound);
+
+    // 2) 하나의 텍스트로 합치기 (줄바꿈으로 구분)
+    String userTranscript = String.join("\n", userOnly);
+
+    String scent = Optional.ofNullable(memoryRecallRound.getScent())
+        .filter(s -> !s.isBlank())
+        .orElse("미상"); // fallback
+    String summary = llmConversationSummarizer.summarizeFromRawText(userTranscript, scent);
+
+    memoryRecallRound.setSummary(summary);
+    memoryRecallRoundRepository.save(memoryRecallRound);
+  }
+
+  //완료된 회차 누르면 결과화면 데이터 불러오기
+  @GetMapping("/api/chat/{roundId}")
+  public MemoryRecallRound getChatHistory(@AuthToken Member member,
+      @PathVariable(name = "roundId") Long roundId) {
+    MemoryRecallRound byMemberAndAndRound = memoryRecallRoundRepository.findByMemberAndAndRound(
+        member, roundId);
+    if (byMemberAndAndRound != null) {
+      return byMemberAndAndRound;
+    } else {
+      throw new IllegalArgumentException("Invalid userId or roundId");
+    }
+  }
+
+  //느낌저장하기
+  @PostMapping("/api/chat/feeling/{roundId}")
+  public void saveFeeling(@PathVariable(name = "roundId") Long roundId,
+      @RequestParam String feeling) {
+    MemoryRecallRound memoryRecallRound = memoryRecallRoundRepository.findById(roundId)
+        .orElseThrow(() -> new IllegalArgumentException("Invalid roundId: " + roundId));
+    memoryRecallRound.setFeeling(feeling);
+    memoryRecallRoundRepository.save(memoryRecallRound);
   }
 }
