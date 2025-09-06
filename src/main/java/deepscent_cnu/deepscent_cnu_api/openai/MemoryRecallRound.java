@@ -46,6 +46,7 @@ public class MemoryRecallRound {
   private String feeling;
 
   @OneToMany(
+      mappedBy = "memoryRecallRound",
       cascade = CascadeType.ALL,
       orphanRemoval = true)
   private List<UserChatMemory> messages = new ArrayList<>();
