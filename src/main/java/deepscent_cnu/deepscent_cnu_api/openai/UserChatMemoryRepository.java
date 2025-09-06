@@ -15,11 +15,11 @@ public interface UserChatMemoryRepository extends JpaRepository<UserChatMemory, 
   void deleteByMemoryId(MemoryRecallRound memoryRecallRound);
 
   @Query("""
-         select m.message
-         from UserChatMemory m
-         where m.memoryRecallRound = :round
-           and m.role = 'USER'
-         order by m.createdAt asc
-         """)
+      select m.message
+      from UserChatMemory m
+      where m.memoryRecallRound = :round
+        and m.role = 'USER'
+      order by m.createdAt asc
+      """)
   List<String> findUserMessagesTextByRound(@Param("round") MemoryRecallRound round);
 }
