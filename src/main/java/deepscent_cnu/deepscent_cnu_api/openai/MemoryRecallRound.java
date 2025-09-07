@@ -50,7 +50,7 @@ public class MemoryRecallRound {
   @OneToMany(
       mappedBy = "memoryRecallRound",
       cascade = CascadeType.ALL,
-      orphanRemoval = true,fetch = FetchType.LAZY,mappedBy = "memoryRecallRound")
+      orphanRemoval = true,fetch = FetchType.LAZY)
   @JsonManagedReference("round-messages")
   private List<UserChatMemory> messages = new ArrayList<>();
 
