@@ -1,5 +1,6 @@
 package deepscent_cnu.deepscent_cnu_api.openai;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,7 +30,7 @@ public class UserChatMemory {
   private Long memoryId; // 사용자 구분 값
 
   @ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
-  @JsonManagedReference("round-messages")
+  @JsonIgnore
   private MemoryRecallRound memoryRecallRound; // 회차 구분 값
 
   private String role; // user / assistant
