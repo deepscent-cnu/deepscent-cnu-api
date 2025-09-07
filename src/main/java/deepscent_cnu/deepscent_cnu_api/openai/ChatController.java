@@ -45,7 +45,6 @@ public class ChatController {
       @PathVariable(name = "roundId") Long roundId,
       @RequestParam(name = "scent") String scent) {
 
-
     MemoryRecallRound byMemberAndAndRound = memoryRecallRoundRepository.findByMemberAndAndRound(
         member, roundId);
     if (byMemberAndAndRound != null) {
@@ -112,12 +111,14 @@ public class ChatController {
 
   //느낌저장하기
   @PostMapping("/api/chat/feeling/{roundId}")
-  public void saveFeeling(@PathVariable(name = "roundId") Long roundId,@AuthToken Member member,
+  public void saveFeeling(@PathVariable(name = "roundId") Long roundId, @AuthToken Member member,
       @RequestParam String feeling) {
-    MemoryRecallRound memoryRecallRound = memoryRecallRoundRepository.findByMemberAndAndRound(member,roundId);
+    MemoryRecallRound memoryRecallRound = memoryRecallRoundRepository.findByMemberAndAndRound(
+        member, roundId);
     memoryRecallRound.setFeeling(feeling);
     memoryRecallRoundRepository.save(memoryRecallRound);
   }
+
   //종료된 회차 라운드 불러오기
   @GetMapping("/api/chat/read/{roundId}")
   public MemoryRecallRound getCompletedRound(@AuthToken Member member,

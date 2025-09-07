@@ -48,6 +48,7 @@ public class MemoryRecallRound {
   private String feeling;
 
   @OneToMany(
+      mappedBy = "memoryRecallRound",
       cascade = CascadeType.ALL,
       orphanRemoval = true,fetch = FetchType.LAZY,mappedBy = "memoryRecallRound")
   @JsonManagedReference("round-messages")
