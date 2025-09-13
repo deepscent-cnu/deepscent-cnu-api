@@ -53,6 +53,13 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(exceptionResponse, HttpStatus.UNAUTHORIZED);
   }
 
+  @ExceptionHandler(value = SlotMappingException.class)
+  public ResponseEntity<ExceptionResponse> handleSlotMappingException(
+      SlotMappingException e) {
+    ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
+    return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Object>> handleGeneralException(Exception ex) {
     ex.printStackTrace();
