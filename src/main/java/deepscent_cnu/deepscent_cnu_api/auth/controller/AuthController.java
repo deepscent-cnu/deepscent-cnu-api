@@ -1,15 +1,18 @@
 package deepscent_cnu.deepscent_cnu_api.auth.controller;
 
-import deepscent_cnu.deepscent_cnu_api.auth.dto.LoginRequest;
-import deepscent_cnu.deepscent_cnu_api.auth.dto.MemberResponse;
-import deepscent_cnu.deepscent_cnu_api.auth.dto.SignupRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.request.LoginRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.request.SignupRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.response.MemberListResponse;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.response.MemberResponse;
 import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
 import deepscent_cnu.deepscent_cnu_api.auth.service.MemberService;
+import deepscent_cnu.deepscent_cnu_api.config.resolver.AdminToken;
 import deepscent_cnu.deepscent_cnu_api.config.resolver.AuthToken;
 import deepscent_cnu.deepscent_cnu_api.util.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,5 +44,10 @@ public class AuthController {
   public ResponseEntity<ApiResponse<Object>> withdraw(@AuthToken Member member) {
     memberService.deleteMember(member.getId());
     return ResponseEntity.ok(new ApiResponse<>(true, "회원 탈퇴가 완료되었습니다.", null));
+  }
+
+  @GetMapping("/member")
+  public ResponseEntity<MemberListResponse> getMemberList(@AdminToken Member member) {
+    return ResponseEntity.ok().body(memberService.getMemberAll());
   }
 }

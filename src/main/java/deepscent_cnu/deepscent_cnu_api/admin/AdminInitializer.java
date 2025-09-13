@@ -1,7 +1,7 @@
 package deepscent_cnu.deepscent_cnu_api.admin;
 
-import deepscent_cnu.deepscent_cnu_api.auth.dto.MemberResponse;
-import deepscent_cnu.deepscent_cnu_api.auth.dto.SignupRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.request.SignupRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.response.MemberResponse;
 import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
 import deepscent_cnu.deepscent_cnu_api.auth.repository.MemberRepository;
 import deepscent_cnu.deepscent_cnu_api.auth.service.MemberService;

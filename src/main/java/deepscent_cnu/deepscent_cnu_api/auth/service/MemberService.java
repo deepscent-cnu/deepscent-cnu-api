@@ -1,8 +1,10 @@
 package deepscent_cnu.deepscent_cnu_api.auth.service;
 
-import deepscent_cnu.deepscent_cnu_api.auth.dto.LoginRequest;
-import deepscent_cnu.deepscent_cnu_api.auth.dto.MemberResponse;
-import deepscent_cnu.deepscent_cnu_api.auth.dto.SignupRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.request.LoginRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.request.SignupRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.response.MemberInfo;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.response.MemberListResponse;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.response.MemberResponse;
 import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
 import deepscent_cnu.deepscent_cnu_api.auth.repository.MemberRepository;
 import deepscent_cnu.deepscent_cnu_api.device_info.entity.DeviceInfo;
@@ -10,6 +12,7 @@ import deepscent_cnu.deepscent_cnu_api.device_info.repository.DeviceRegisterRepo
 import deepscent_cnu.deepscent_cnu_api.exception.ErrorCode;
 import deepscent_cnu.deepscent_cnu_api.exception.MemberException;
 import deepscent_cnu.deepscent_cnu_api.util.JwtTokenProvider;
+import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,5 +97,15 @@ public class MemberService {
   public Member findById(Long id) {
     return memberRepository.findById(id)
         .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+  }
+
+  @Transactional(readOnly = true)
+  public MemberListResponse getMemberAll() {
+    List<MemberInfo> memberList = memberRepository.findAll().stream()
+        .map((member) -> new MemberInfo(
+            member.getId(), member.getName(), member.getBirthDate(), member.getPhoneNumber(),
+            member.getUsername())).toList();
+
+    return new MemberListResponse(memberList);
   }
 }

@@ -1,4 +1,4 @@
-package deepscent_cnu.deepscent_cnu_api.auth.dto;
+package deepscent_cnu.deepscent_cnu_api.auth.dto.response;
 
 import java.time.LocalDate;
 

@@ -46,6 +46,13 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
   }
 
+  @ExceptionHandler(value = MemberException.class)
+  public ResponseEntity<ExceptionResponse> handleMemberException(
+      MemberException e) {
+    ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
+    return new ResponseEntity<>(exceptionResponse, HttpStatus.UNAUTHORIZED);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Object>> handleGeneralException(Exception ex) {
     ex.printStackTrace();
