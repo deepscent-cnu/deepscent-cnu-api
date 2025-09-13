@@ -1,13 +1,16 @@
 package deepscent_cnu.deepscent_cnu_api.admin;
 
-import deepscent_cnu.deepscent_cnu_api.auth.dto.MemberResponse;
-import deepscent_cnu.deepscent_cnu_api.auth.dto.SignupRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.request.SignupRequest;
+import deepscent_cnu.deepscent_cnu_api.auth.dto.response.MemberResponse;
 import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
 import deepscent_cnu.deepscent_cnu_api.auth.repository.MemberRepository;
 import deepscent_cnu.deepscent_cnu_api.auth.service.MemberService;
 import deepscent_cnu.deepscent_cnu_api.device_info.dto.request.DeviceRegisterRequest;
+import deepscent_cnu.deepscent_cnu_api.device_info.dto.request.RegisterSlotInfoRequest;
 import deepscent_cnu.deepscent_cnu_api.device_info.service.DeviceRegisterService;
+import deepscent_cnu.deepscent_cnu_api.device_info.service.SlotInfoService;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,16 +26,18 @@ public class AdminInitializer implements ApplicationRunner {
   private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final DeviceRegisterService deviceRegisterService;
+  private final SlotInfoService slotInfoService;
   @Value("${admin.username}")
   private String username;
   @Value("${admin.password}")
   private String password;
 
   public AdminInitializer(MemberService memberService, MemberRepository memberRepository,
-      DeviceRegisterService deviceRegisterService) {
+      DeviceRegisterService deviceRegisterService, SlotInfoService slotInfoService) {
     this.memberService = memberService;
     this.deviceRegisterService = deviceRegisterService;
     this.memberRepository = memberRepository;
+    this.slotInfoService = slotInfoService;
   }
 
   @Override
@@ -46,6 +51,17 @@ public class AdminInitializer implements ApplicationRunner {
     for (int deviceNumber = 1; deviceNumber <= 3; deviceNumber++) {
       deviceRegisterService.registerDeviceId(member,
           new DeviceRegisterRequest(deviceNumber, deviceIds.get(deviceNumber - 1)));
+    }
+
+    List<String> scents = new ArrayList<>(
+        List.of("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"));
+    for (int deviceNumber = 1; deviceNumber <= 3; deviceNumber++) {
+      for (int fanNumber = 1; fanNumber <= 4; fanNumber++) {
+        int scentIdx = (deviceNumber - 1) * 4 + (fanNumber - 1);
+        slotInfoService.registerSlotInfo(
+            new RegisterSlotInfoRequest(memberResponse.id(), deviceNumber, fanNumber,
+                scents.get(scentIdx)));
+      }
     }
   }
 }

@@ -11,31 +11,34 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-public class AuthTokenMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public class AdminTokenMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
   private final MemberService memberService;
 
-  public AuthTokenMethodArgumentResolver(MemberService memberService) {
+  public AdminTokenMethodArgumentResolver(MemberService memberService) {
     this.memberService = memberService;
   }
 
   @Override
   public boolean supportsParameter(MethodParameter parameter) {
-    return parameter.hasParameterAnnotation(AuthToken.class)
-        && Member.class.isAssignableFrom(parameter.getParameterType());
+    return parameter.hasParameterAnnotation(AdminToken.class) && Member.class.isAssignableFrom(
+        parameter.getParameterType());
   }
 
   @Override
-  public Object resolveArgument(
-      MethodParameter parameter,
-      ModelAndViewContainer mavContainer,
-      NativeWebRequest webRequest,
-      WebDataBinderFactory binderFactory
-  ) {
+  public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+      NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
     HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
     Long memberId = (Long) request.getAttribute("memberId");
+
     if (memberId == null) {
       throw new MemberException(ErrorCode.TOKEN_REQUIRED);
+    }
+
+    Member member = memberService.findById(memberId);
+
+    if (!member.getUsername().equalsIgnoreCase("admin")) {
+      throw new MemberException(ErrorCode.NOT_ADMIN);
     }
 
     return memberService.findById(memberId);

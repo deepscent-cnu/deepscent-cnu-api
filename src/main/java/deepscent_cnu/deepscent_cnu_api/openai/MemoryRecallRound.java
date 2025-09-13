@@ -1,6 +1,5 @@
 package deepscent_cnu.deepscent_cnu_api.openai;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -50,7 +49,7 @@ public class MemoryRecallRound {
   @OneToMany(
       mappedBy = "memoryRecallRound",
       cascade = CascadeType.ALL,
-      orphanRemoval = true,fetch = FetchType.LAZY)
+      orphanRemoval = true, fetch = FetchType.LAZY)
   private List<UserChatMemory> messages = new ArrayList<>();
 
 }

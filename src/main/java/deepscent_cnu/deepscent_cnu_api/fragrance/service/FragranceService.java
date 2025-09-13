@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import deepscent_cnu.deepscent_cnu_api.auth.entity.Member;
 import deepscent_cnu.deepscent_cnu_api.config.resolver.AuthToken;
 import deepscent_cnu.deepscent_cnu_api.device_info.entity.DeviceInfo;
+import deepscent_cnu.deepscent_cnu_api.device_info.entity.SlotInfo;
 import deepscent_cnu.deepscent_cnu_api.device_info.repository.DeviceRegisterRepository;
+import deepscent_cnu.deepscent_cnu_api.device_info.repository.SlotInfoRepository;
+import deepscent_cnu.deepscent_cnu_api.exception.SlotMappingException;
 import deepscent_cnu.deepscent_cnu_api.fragrance.dto.request.CorrectOptionRequest;
 import deepscent_cnu.deepscent_cnu_api.fragrance.dto.request.FanStateRequest;
 import deepscent_cnu.deepscent_cnu_api.fragrance.dto.response.CapsuleInfo;
@@ -40,44 +43,52 @@ public class FragranceService {
   @Value("${deepscent.access-token}")
   private String deepscentAccessToken;
   private DeviceRegisterRepository deviceRegisterRepository;
+  private SlotInfoRepository slotInfoRepository;
 
-  public FragranceService(DeviceRegisterRepository deviceRegisterRepository) {
+  public FragranceService(DeviceRegisterRepository deviceRegisterRepository,
+      SlotInfoRepository slotInfoRepository) {
     this.deviceRegisterRepository = deviceRegisterRepository;
+    this.slotInfoRepository = slotInfoRepository;
   }
 
   public CapsuleInfoResponse getCartridgeState(@AuthToken Member member) throws Exception {
-    List<String> deviceIds = getDeviceIds(member);
     List<CapsuleInfo> capsuleInfoList = new ArrayList<>();
+    List<SlotInfo> slotInfoList = slotInfoRepository.findAllByMember(member);
 
-    for (int idx = 0; idx < deviceIds.size(); idx++) {
-      List<String> capsuleSerials = getCapsuleSerials(deviceIds.get(idx));
-      List<String> capsuleNameList = getCapsuleNames(capsuleSerials);
+    if (slotInfoList.size() < 12) {
+      throw new SlotMappingException("향기 매핑을 먼저 완료해주세요.");
+    }
 
-      for (int fanNumber = 1; fanNumber <= 4; fanNumber++) {
-        capsuleInfoList.add(
-            new CapsuleInfo(capsuleNameList.get(fanNumber - 1), idx + 1, fanNumber));
-      }
+    for (SlotInfo slotInfo : slotInfoList) {
+      Integer deviceNumber = slotInfo.getDeviceNumber();
+      Integer fanNumber = slotInfo.getFanNumber();
+      String scent = slotInfo.getScent();
+
+      capsuleInfoList.add(new CapsuleInfo(scent, deviceNumber, fanNumber));
     }
 
     return new CapsuleInfoResponse(capsuleInfoList);
   }
 
   public CorrectScentListResponse getCorrectScentList(@AuthToken Member member) throws Exception {
-    List<String> deviceIds = getDeviceIds(member);
+    List<SlotInfo> slotInfoList = slotInfoRepository.findAllByMember(member);
     List<CorrectScent> candidates = new ArrayList<>();
 
-    for (int idx = 0; idx < deviceIds.size(); idx++) {
-      String deviceId = deviceIds.get(idx);
-      List<String> capsuleSerials = getCapsuleSerials(deviceId);
-      List<String> capsuleNameList = getCapsuleNames(capsuleSerials);
+    if (slotInfoList.size() < 12) {
+      throw new SlotMappingException("향기 매핑을 먼저 완료해주세요.");
+    }
 
-      for (int fanNumber = 1; fanNumber <= 4; fanNumber++) {
-        candidates.add(new CorrectScent(capsuleNameList.get(fanNumber - 1), idx + 1, fanNumber));
-      }
+    for (SlotInfo slotInfo : slotInfoList) {
+      Integer deviceNumber = slotInfo.getDeviceNumber();
+      Integer fanNumber = slotInfo.getFanNumber();
+      String scent = slotInfo.getScent();
+
+      candidates.add(new CorrectScent(scent, deviceNumber, fanNumber));
     }
 
     Set<Integer> selectedIndexes = new HashSet<>();
     Random random = new Random();
+
     while (selectedIndexes.size() < 4) {
       int index = random.nextInt(candidates.size());
       selectedIndexes.add(index);

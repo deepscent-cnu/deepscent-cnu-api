@@ -22,8 +22,14 @@ public class ResolverConfig implements WebMvcConfigurer {
     return new AuthTokenMethodArgumentResolver(memberService);
   }
 
+  @Bean
+  public AdminTokenMethodArgumentResolver adminTokenMethodArgumentResolver() {
+    return new AdminTokenMethodArgumentResolver(memberService);
+  }
+
   @Override
   public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
     resolvers.add(authTokenMethodArgumentResolver());
+    resolvers.add(adminTokenMethodArgumentResolver());
   }
 }
