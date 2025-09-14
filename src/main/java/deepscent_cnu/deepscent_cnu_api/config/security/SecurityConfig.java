@@ -1,5 +1,6 @@
 package deepscent_cnu.deepscent_cnu_api.config.security;
 
+import jakarta.servlet.DispatcherType;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,9 +33,13 @@ public class SecurityConfig {
             .requestMatchers("/api/stt/**").permitAll()
             .requestMatchers("/api/chat/**").permitAll()
             .requestMatchers("/api/chat1/**").permitAll()
+            .requestMatchers("/api/admin/**").permitAll()
             .requestMatchers("/api/normal-olfactory-training/**").permitAll()
             .requestMatchers("/api/memory-recall-training/log/**").permitAll()
             .requestMatchers("/h2-console/**").permitAll()
+            .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
+            .requestMatchers("/admin/**", "/admin/login", "/admin/dashboard", "/error",
+                "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
             .anyRequest().authenticated()
         );
 
