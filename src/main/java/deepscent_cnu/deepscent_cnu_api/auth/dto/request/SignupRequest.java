@@ -15,10 +15,8 @@ public record SignupRequest(
     LocalDate birthDate,
 
     @Pattern(regexp = "^010\\d{8}$", message = "전화번호 형식이 올바르지 않습니다.")
+    @NotBlank(message = "전화번호는 필수 입력 항목입니다.")
     String phoneNumber,
-
-    @NotBlank(message = "아이디는 필수 입력 항목입니다.")
-    String username,
 
     @NotBlank(message = "비밀번호는 필수 입력 항목입니다.")
     String password

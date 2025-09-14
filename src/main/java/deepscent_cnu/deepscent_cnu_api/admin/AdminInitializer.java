@@ -21,14 +21,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdminInitializer implements ApplicationRunner {
 
-  private static final List<String> deviceIds = List.of("lounge_08D1F918C7EC",
-      "lounge_08D1F918C7EC", "lounge_08D1F918C7EC");
+  private static final List<String> deviceIds = List.of("lounge_08D1F918C7E0",
+      "lounge_08D1F918C7E0", "lounge_08D1F918C7E0");
   private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final DeviceRegisterService deviceRegisterService;
   private final SlotInfoService slotInfoService;
-  @Value("${admin.username}")
-  private String username;
   @Value("${admin.password}")
   private String password;
 
@@ -43,7 +41,7 @@ public class AdminInitializer implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) {
     MemberResponse memberResponse = memberService.signup(
-        new SignupRequest("관리자", LocalDate.of(1990, 1, 1), "01012345678", username, password)
+        new SignupRequest("관리자", LocalDate.of(1990, 1, 1), "admin", password)
     );
     Member member = memberRepository.findById(memberResponse.id())
         .orElseThrow(() -> new NoSuchElementException("유저 정보가 존재하지 않습니다."));
