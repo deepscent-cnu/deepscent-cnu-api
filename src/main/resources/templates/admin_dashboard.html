@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <title>관리자 대시보드</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background: #f9fafb;
+    }
+
+    header {
+      background: #3b82f6;
+      color: #fff;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    main {
+      padding: 1rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
+      padding: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: .75rem;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: .9rem;
+    }
+
+    th {
+      background: #f3f4f6;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    #logoutBtn {
+      background: #ef4444;
+      border: none;
+      color: #fff;
+      padding: .5rem .9rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #status {
+      font-size: .9rem;
+      color: #fff;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    a.action {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    a.action:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>관리자 대시보드</h1>
+  <div>
+    <span class="hidden" id="status">로딩 중...</span>
+    <button id="logoutBtn">로그아웃</button>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <h2 style="margin:0;">회원 목록</h2>
+    <table aria-label="회원 목록 테이블" id="membersTable">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>이름</th>
+        <th>생년월일</th>
+        <th>전화번호</th>
+        <th>아이디</th>
+        <th>관리</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- JS로 데이터 채움 -->
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+  const TOKEN_KEY = "accessToken";
+
+  function getToken() {
+    return (sessionStorage.getItem(TOKEN_KEY) || "").toString().trim();
+  }
+
+  function showStatus(text) {
+    const el = document.getElementById("status");
+    if (!text) {
+      el.classList.add("hidden");
+      el.textContent = "";
+      return;
+    }
+    el.textContent = text;
+    el.classList.remove("hidden");
+  }
+
+  function normalizeMembers(payload) {
+    // 다양한 백엔드 응답 키 대응
+    const list =
+        payload?.memberList ??
+        payload?.members ??
+        payload?.data?.memberList ??
+        payload?.data?.members ??
+        [];
+    return Array.isArray(list) ? list : [];
+  }
+
+  function renderMembers(members) {
+    const tbody = document.querySelector("#membersTable tbody");
+    tbody.innerHTML = "";
+
+    if (!members.length) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="6" style="color:#6b7280;">표시할 회원이 없습니다.</td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+
+    members.forEach(m => {
+      const username = m.username ?? m.userName ?? "";
+      const birthDate = m.birthDate ?? "";
+      const phone = m.phoneNumber ?? m.phone ?? "";
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${m.id ?? ""}</td>
+        <td>${m.name ?? ""}</td>
+        <td>${birthDate}</td>
+        <td>${phone}</td>
+        <td>${username}</td>
+        <td><a class="action" href="/admin/member/${m.id}/slots">슬롯 관리</a></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function loadMembers() {
+    const raw = getToken();
+    if (!raw) {
+      alert("로그인이 필요합니다.");
+      location.href = "/admin/login";
+      return;
+    }
+    // 혹시 저장 시 Bearer가 포함돼 있으면 제거
+    const token = raw.replace(/^Bearer\s+/i, "").trim();
+
+    showStatus("회원 목록 불러오는 중...");
+
+    try {
+      const headers = new Headers();
+      headers.set("Authorization", "Bearer " + token);
+
+      const res = await fetch("/api/admin/members", {headers});
+      console.log("[client] response status:", res.status);
+      const bodyText = await res.text();
+      console.log("[client] response body (raw):", bodyText);
+
+      let data;
+      try {
+        data = bodyText ? JSON.parse(bodyText) : null;
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          sessionStorage.removeItem(TOKEN_KEY);
+          alert("인증이 만료되었거나 유효하지 않습니다. 다시 로그인해주세요.");
+          location.href = "/admin/login";
+          return;
+        }
+        alert((data && data.message) ? data.message : `회원 목록을 불러올 수 없습니다. (HTTP ${res.status})`);
+        return;
+      }
+
+      const members = normalizeMembers(data);
+      renderMembers(members);
+    } catch (err) {
+      console.error("[client] fetch error:", err);
+      alert("회원 목록을 불러올 수 없습니다.");
+    } finally {
+      showStatus("");
+    }
+  }
+
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    sessionStorage.removeItem(TOKEN_KEY);
+    location.href = "/admin/login";
+  });
+
+  loadMembers();
+</script>
+</body>
+</html>
