@@ -39,8 +39,8 @@ public class MemberService {
 
   @Transactional
   public MemberResponse signup(SignupRequest request) {
-    if (memberRepository.findByUsername(request.username()).isPresent()) {
-      throw new MemberException(ErrorCode.USERNAME_ALREADY_EXISTS);
+    if (memberRepository.findByPhoneNumber(request.phoneNumber()).isPresent()) {
+      throw new MemberException(ErrorCode.PHONENUMBER_ALREADY_EXISTS);
     }
 
     Member member = new Member(
@@ -48,7 +48,6 @@ public class MemberService {
         request.name(),
         request.birthDate(),
         request.phoneNumber(),
-        request.username(),
         passwordEncoder.encode(request.password())
     );
     Member savedMember = memberRepository.save(member);
@@ -61,14 +60,13 @@ public class MemberService {
         savedMember.getName(),
         savedMember.getBirthDate(),
         savedMember.getPhoneNumber(),
-        savedMember.getUsername(),
         token
     );
   }
 
   @Transactional
   public MemberResponse login(LoginRequest request) {
-    Member member = memberRepository.findByUsername(request.username())
+    Member member = memberRepository.findByPhoneNumber(request.phoneNumber())
         .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
 
     if (!passwordEncoder.matches(request.password(), member.getPassword())) {
@@ -81,7 +79,6 @@ public class MemberService {
         member.getName(),
         member.getBirthDate(),
         member.getPhoneNumber(),
-        member.getUsername(),
         token
     );
   }
@@ -103,8 +100,8 @@ public class MemberService {
   public MemberListResponse getMemberAll() {
     List<MemberInfo> memberList = memberRepository.findAll().stream()
         .map((member) -> new MemberInfo(
-            member.getId(), member.getName(), member.getBirthDate(), member.getPhoneNumber(),
-            member.getUsername())).toList();
+            member.getId(), member.getName(), member.getBirthDate(), member.getPhoneNumber()))
+        .toList();
 
     return new MemberListResponse(memberList);
   }

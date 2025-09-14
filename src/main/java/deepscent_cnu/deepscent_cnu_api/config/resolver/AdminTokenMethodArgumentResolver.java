@@ -37,7 +37,7 @@ public class AdminTokenMethodArgumentResolver implements HandlerMethodArgumentRe
 
     Member member = memberService.findById(memberId);
 
-    if (!member.getUsername().equalsIgnoreCase("admin")) {
+    if (!member.getPhoneNumber().equalsIgnoreCase("admin")) {
       throw new MemberException(ErrorCode.NOT_ADMIN);
     }
 

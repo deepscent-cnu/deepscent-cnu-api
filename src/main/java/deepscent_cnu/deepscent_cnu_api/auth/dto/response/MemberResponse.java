@@ -7,7 +7,6 @@ public record MemberResponse(
     String name,
     LocalDate birthDate,
     String phoneNumber,
-    String username,
     String token
 ) {
 

@@ -6,8 +6,7 @@ public record MemberInfo(
     Long id,
     String name,
     LocalDate birthDate,
-    String phoneNumber,
-    String userName
+    String phoneNumber
 ) {
 
 }
