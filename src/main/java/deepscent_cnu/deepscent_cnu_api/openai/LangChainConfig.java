@@ -24,7 +24,7 @@ public class LangChainConfig {
   public ChatLanguageModel chatModel() {
     return OpenAiChatModel.builder()
         .apiKey(OPEN_API_KEY)
-        .modelName("gpt-4o-mini") // 16k 토큰 모델
+        .modelName("gpt-4o") // 16k 토큰 모델
         .logRequests(true)
         .logResponses(true)
         .build();
