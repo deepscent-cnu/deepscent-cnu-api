@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemoryRecallRoundRepository extends JpaRepository<MemoryRecallRound, Long> {
 
-  MemoryRecallRound findByMemberAndAndRound(Member member, Long roundId);
+  MemoryRecallRound findByMemberAndAndRound(Member member, Long round);
 }

@@ -40,13 +40,13 @@ public class ChatController {
 
   //해당 회차 대화 시작
   //회차 시작하고 향기를 선택한 후 호출
-  @PostMapping("/api/chat/start/{roundId}")
+  @PostMapping("/api/chat/start/{round}")
   public MemoryRecallRound startChat(@AuthToken Member member,
-      @PathVariable(name = "roundId") Long roundId,
+      @PathVariable(name = "round") Long round,
       @RequestParam(name = "scent") String scent) {
 
     MemoryRecallRound byMemberAndAndRound = memoryRecallRoundRepository.findByMemberAndAndRound(
-        member, roundId);
+        member, round);
     if (byMemberAndAndRound != null) {
       // 자식만 삭제
       userChatMemoryRepository.deleteByMemoryRecallRound(byMemberAndAndRound);
@@ -55,7 +55,7 @@ public class ChatController {
     } else {
       MemoryRecallRound memoryRecallRound1 = new MemoryRecallRound();
       memoryRecallRound1.setMember(member);
-      memoryRecallRound1.setRound(roundId);
+      memoryRecallRound1.setRound(round);
       memoryRecallRound1.setCreatedAt(java.time.LocalDateTime.now());
       memoryRecallRound1.setScent(scent);
       memoryRecallRoundRepository.save(memoryRecallRound1);
@@ -110,21 +110,21 @@ public class ChatController {
   }
 
   //느낌저장하기
-  @PostMapping("/api/chat/feeling/{roundId}")
-  public void saveFeeling(@PathVariable(name = "roundId") Long roundId, @AuthToken Member member,
+  @PostMapping("/api/chat/feeling/{round}")
+  public void saveFeeling(@PathVariable(name = "round") Long round, @AuthToken Member member,
       @RequestParam String feeling) {
     MemoryRecallRound memoryRecallRound = memoryRecallRoundRepository.findByMemberAndAndRound(
-        member, roundId);
+        member, round);
     memoryRecallRound.setFeeling(feeling);
     memoryRecallRoundRepository.save(memoryRecallRound);
   }
 
   //종료된 회차 라운드 불러오기
-  @GetMapping("/api/chat/read/{roundId}")
+  @GetMapping("/api/chat/read/{round}")
   public MemoryRecallRound getCompletedRound(@AuthToken Member member,
-      @PathVariable(name = "roundId") Long roundId) {
+      @PathVariable(name = "round") Long round) {
     MemoryRecallRound byMemberAndAndRound = memoryRecallRoundRepository.findByMemberAndAndRound(
-        member, roundId);
+        member, round);
     if (byMemberAndAndRound != null) {
       return byMemberAndAndRound;
     } else {
