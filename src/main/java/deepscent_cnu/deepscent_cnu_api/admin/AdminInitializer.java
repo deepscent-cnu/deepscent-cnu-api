@@ -56,9 +56,6 @@ public class AdminInitializer implements ApplicationRunner {
     for (int deviceNumber = 1; deviceNumber <= 3; deviceNumber++) {
       for (int fanNumber = 1; fanNumber <= 4; fanNumber++) {
         int scentIdx = (deviceNumber - 1) * 4 + (fanNumber - 1);
-        if (scentIdx == 2) {
-          continue;
-        }
         slotInfoService.registerSlotInfo(
             new RegisterSlotInfoRequest(memberResponse.id(), deviceNumber, fanNumber,
                 scents.get(scentIdx)));
