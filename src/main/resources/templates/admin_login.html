@@ -97,8 +97,8 @@
 
   <form autocomplete="on" id="loginForm">
     <div class="field">
-      <label for="username">아이디(이메일)</label>
-      <input autofocus id="username" name="username" required type="text"/>
+      <label for="phoneNumber">전화번호</label>
+      <input autofocus id="phoneNumber" name="phoneNumber" required type="text"/>
     </div>
 
     <div class="field">
@@ -123,11 +123,11 @@
     msg.textContent = "";
     msg.className = "msg";
 
-    const username = document.getElementById("username").value.trim();
+    const phoneNumber = document.getElementById("phoneNumber").value.trim();
     const password = document.getElementById("password").value;
 
-    if (!username || !password) {
-      msg.textContent = "아이디와 비밀번호를 입력하세요.";
+    if (!phoneNumber || !password) {
+      msg.textContent = "전화번호와 비밀번호를 입력하세요.";
       msg.className = "msg error";
       return;
     }
@@ -140,7 +140,7 @@
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({username, password})
+        body: JSON.stringify({phoneNumber, password})
       });
 
       const text = await res.text();
@@ -152,7 +152,7 @@
       }
 
       if (!res.ok || !data || data.success !== true || !data.data) {
-        const serverMsg = data?.message || "로그인 실패: 아이디/비밀번호를 확인하세요.";
+        const serverMsg = data?.message || "로그인 실패: 전화번호/비밀번호를 확인하세요.";
         msg.textContent = serverMsg;
         msg.className = "msg error";
         return;

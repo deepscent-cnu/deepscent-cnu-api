@@ -25,6 +25,21 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
   private final UserChatMemoryRepository repository;
   private final MemoryRecallRoundRepository memoryRecallRoundRepository;
 
+  private static String sessionTitleOf(Long round) {
+    int n = (round == null) ? 0 : round.intValue();
+    return switch (n) {
+      case 1 -> "어린 시절";
+      case 2 -> "가족";
+      case 3 -> "학교/학창 시절";
+      case 4 -> "결혼/연애";
+      case 5 -> "자녀/육아";
+      case 6 -> "취미와 여가";
+      case 7 -> "일과 사회생활";
+      case 8 -> "나의 삶, 지금의 나";
+      default -> "회기 미정";
+    };
+  }
+
   @Override
   public List<ChatMessage> getMessages(Object roundId) {
     roundId = (Long) roundId;
@@ -54,12 +69,10 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
     MemoryRecallRound memoryRecallRound = memoryRecallRoundRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Invalid memoryId: " + id));
 
-
     // DB에 저장된 향기 사용
     String scent = Optional.ofNullable(memoryRecallRound.getScent())
         .filter(s -> !s.isBlank())
         .orElse("라벤더"); // fallback
-
 
     // 1. 기존 메시지 조회
     List<UserChatMemory> existingMessages = repository.findByMemoryRecallRoundOrderByCreatedAtAsc(
@@ -68,23 +81,23 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
       Long round = memoryRecallRound.getRound();
       String SESSION = sessionTitleOf(round);
       String template = """
-                  당신은 65세 이상 경도인지장애(MCI) 노인을 위한 향기 기반 기억 회상 도우미 AI입니다.
-                  이번 회기 주제: ${SESSION}
-                  지금 사용자가 맡은 향기는 '${SCENT}'입니다.
-                  당신의 역할:
-                  - 향기, 회기 주제, 일상 맥락을 단서로 사용자가 자서전적 기억을 떠올리도록 돕습니다.
-                  - 질문은 짧고 한 번에 하나씩, 사용자의 말에 공감 피드백을 준 뒤 다음 질문을 이어갑니다.
-                  - 후속 질문은 **최대 10회**까지만 허용하고, 이후 요약 및 종료 멘트로 마무리합니다.
-                  
-                  출력 규칙(중요):
-                  - 질문은 반드시 한 줄에 하나, **"[Q] "**로 시작합니다. (총 9개까지만)
-                  - 9번째 질문 이후에는 질문을 더 하지 말고, **"[SUMMARY]"**로 시작하는 두세 문장 요약과
-                  종료 멘트 한 문장을 출력하고 대화를 종료합니다.
-                  
-                  유의사항:
-                  - 질문은 너무 길거나 반복적이지 않도록 합니다.
-                  - 감정적 피드백은 질문 사이에 짧게 제시해 사용자의 경험을 인정합니다.
-                  """;
+          당신은 65세 이상 경도인지장애(MCI) 노인을 위한 향기 기반 기억 회상 도우미 AI입니다.
+          이번 회기 주제: ${SESSION}
+          지금 사용자가 맡은 향기는 '${SCENT}'입니다.
+          당신의 역할:
+          - 향기, 회기 주제, 일상 맥락을 단서로 사용자가 자서전적 기억을 떠올리도록 돕습니다.
+          - 질문은 짧고 한 번에 하나씩, 사용자의 말에 공감 피드백을 준 뒤 다음 질문을 이어갑니다.
+          - 후속 질문은 **최대 10회**까지만 허용하고, 이후 요약 및 종료 멘트로 마무리합니다.
+                            
+          출력 규칙(중요):
+          - 질문은 반드시 한 줄에 하나, **"[Q] "**로 시작합니다. (총 9개까지만)
+          - 9번째 질문 이후에는 질문을 더 하지 말고, **"[SUMMARY]"**로 시작하는 두세 문장 요약과
+          종료 멘트 한 문장을 출력하고 대화를 종료합니다.
+                            
+          유의사항:
+          - 질문은 너무 길거나 반복적이지 않도록 합니다.
+          - 감정적 피드백은 질문 사이에 짧게 제시해 사용자의 경험을 인정합니다.
+          """;
       String systemPrompt = template
           .replace("${SCENT}", scent)
           .replace("${SESSION}", SESSION);
@@ -150,20 +163,5 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
   public void deleteMessages(Object memoryId) {
 
     repository.deleteByMemoryId((MemoryRecallRound) memoryId);
-  }
-
-  private static String sessionTitleOf(Long round) {
-    int n = (round == null) ? 0 : round.intValue();
-    return switch (n) {
-      case 1 -> "어린 시절";
-      case 2 -> "가족";
-      case 3 -> "학교/학창 시절";
-      case 4 -> "결혼/연애";
-      case 5 -> "자녀/육아";
-      case 6 -> "취미와 여가";
-      case 7 -> "일과 사회생활";
-      case 8 -> "나의 삶, 지금의 나";
-      default -> "회기 미정";
-    };
   }
 }

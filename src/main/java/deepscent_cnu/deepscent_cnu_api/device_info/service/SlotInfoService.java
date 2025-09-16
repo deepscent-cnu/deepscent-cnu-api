@@ -13,6 +13,7 @@ import deepscent_cnu.deepscent_cnu_api.exception.MemberException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,8 +32,17 @@ public class SlotInfoService {
         .orElseThrow(() -> new MemberException(
             ErrorCode.TARGET_MEMBER_NOT_FOUND));
 
-    slotInfoRepository.save(
-        new SlotInfo(targetMember, request.deviceNumber(), request.fanNumber(), request.scent()));
+    Optional<SlotInfo> slotInfo = slotInfoRepository.findByMemberAndDeviceNumberAndFanNumber(
+        targetMember,
+        request.deviceNumber(), request.fanNumber());
+
+    if (slotInfo.isPresent()) {
+      slotInfo.get().setScent(request.scent());
+      slotInfoRepository.save(slotInfo.get());
+    } else {
+      slotInfoRepository.save(
+          new SlotInfo(targetMember, request.deviceNumber(), request.fanNumber(), request.scent()));
+    }
   }
 
   public CapsuleInfoResponse getSlotInfoList(TargetMemberIdRequest request) {
