@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 public class SlotInfo {
@@ -30,6 +31,7 @@ public class SlotInfo {
   private Integer fanNumber;
 
   @Getter
+  @Setter
   @Column(nullable = false)
   private String scent;
 

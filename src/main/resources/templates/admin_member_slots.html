@@ -166,7 +166,7 @@
     }
 
     // scentName → scent 로 통일
-    return arr.map(it => ({
+    return arr.map(it => (it == null ? null : {
       scent: it.scent ?? it.scentName ?? "",
       deviceNumber: it.deviceNumber ?? "",
       fanNumber: it.fanNumber ?? ""
