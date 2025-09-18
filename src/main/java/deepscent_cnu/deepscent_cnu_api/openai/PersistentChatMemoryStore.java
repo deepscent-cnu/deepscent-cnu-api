@@ -33,26 +33,25 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
   private static final Pattern Q_PATTERN = Pattern.compile("^\\s*\\[Q(\\d{1,2})]\\s*");
   private static final Pattern SUMMARY_PATTERN =
       Pattern.compile("^\\s*\\[(?:요약|SUMMARY)]\\s*", Pattern.CASE_INSENSITIVE);
-
   private static boolean isAssistant(UserChatMemory m) {
     return "ASSISTANT".equals(m.getRole());
   }
-
   private static boolean isQuestion(String text) {
-    return text != null && text.stripLeading().startsWith("[Q");
+    if (text == null) return false;
+    Matcher m = Q_PATTERN.matcher(text.stripLeading());
+    if (!m.find()) return false;
+    int n = Integer.parseInt(m.group(1));
+    return n >= 1 && n <= QUESTION_LIMIT;
   }
-
-  private static boolean isSummary(String text) {
-    return text != null && text.stripLeading().startsWith("[SUMMARY]");
-  }
-
   private static int extractQNumber(String text) {
     if (text == null) return -1;
     Matcher m = Q_PATTERN.matcher(text.stripLeading());
     return m.find() ? Integer.parseInt(m.group(1)) : -1;
   }
-
-  // 한 메시지에 [Q]가 여러 개 들어온 경우 첫 번째 줄만 남김(질문 1개/턴 강제)
+  private static boolean isSummary(String text) {
+    return text != null && SUMMARY_PATTERN.matcher(text.stripLeading()).find();
+  }
+  /** 한 메시지에 여러 줄이 와도 첫 [Q…] 한 줄만 저장 */
   private static String keepOnlyFirstQLineIfAny(String text) {
     if (text == null) return null;
     String[] lines = text.split("\\R");
@@ -61,7 +60,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
     }
     return text; // [Q] 없으면 원문 유지
   }
-
+  /** 번호 틀리면 [Q{expected}]로 보정 */
   private static String normalizeQNumber(String text, int expected) {
     if (text == null) return null;
     return text.replaceFirst("\\[Q\\d+\\]", "[Q" + expected + "]");
