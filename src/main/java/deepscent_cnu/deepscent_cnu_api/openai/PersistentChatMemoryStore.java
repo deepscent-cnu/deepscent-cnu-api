@@ -7,12 +7,9 @@ import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,40 +27,29 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
 
 
   private static final int QUESTION_LIMIT = 10;
-  private static final Pattern Q_PATTERN = Pattern.compile("^\\s*\\[Q(\\d{1,2})]\\s*");
-  private static final Pattern SUMMARY_PATTERN =
-      Pattern.compile("^\\s*\\[(?:요약|SUMMARY)]\\s*", Pattern.CASE_INSENSITIVE);
+
   private static boolean isAssistant(UserChatMemory m) {
     return "ASSISTANT".equals(m.getRole());
   }
+
   private static boolean isQuestion(String text) {
-    if (text == null) return false;
-    Matcher m = Q_PATTERN.matcher(text.stripLeading());
-    if (!m.find()) return false;
-    int n = Integer.parseInt(m.group(1));
-    return n >= 1 && n <= QUESTION_LIMIT;
+    return text != null && text.stripLeading().startsWith("[Q");
   }
-  private static int extractQNumber(String text) {
-    if (text == null) return -1;
-    Matcher m = Q_PATTERN.matcher(text.stripLeading());
-    return m.find() ? Integer.parseInt(m.group(1)) : -1;
-  }
+
   private static boolean isSummary(String text) {
-    return text != null && SUMMARY_PATTERN.matcher(text.stripLeading()).find();
+    return text != null && text.stripLeading().startsWith("[SUMMARY]");
   }
-  /** 한 메시지에 여러 줄이 와도 첫 [Q…] 한 줄만 저장 */
-  private static String keepOnlyFirstQLineIfAny(String text) {
+
+  // 한 메시지에 [Q]가 여러 개 들어온 경우 첫 번째 줄만 남김(질문 1개/턴 강제)
+  private static String keepOnlyFirstQuestionLine(String text) {
     if (text == null) return null;
     String[] lines = text.split("\\R");
     for (String line : lines) {
-      if (Q_PATTERN.matcher(line.stripLeading()).find()) return line.strip();
+      if (line.stripLeading().startsWith("[Q")) {
+        return line.strip(); // 첫 [Q] 줄만 저장
+      }
     }
     return text; // [Q] 없으면 원문 유지
-  }
-  /** 번호 틀리면 [Q{expected}]로 보정 */
-  private static String normalizeQNumber(String text, int expected) {
-    if (text == null) return null;
-    return text.replaceFirst("\\[Q\\d+\\]", "[Q" + expected + "]");
   }
 
   @Override
@@ -142,82 +128,45 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
       repository.save(systemMessage); //  실제 DB에 저장됨
       existingMessages.add(systemMessage); //  이후 로직에서도 사용 가능
     }
-    long qCountSoFar = existingMessages.stream()
-        .filter(PersistentChatMemoryStore::isAssistant)
-        .map(UserChatMemory::getMessage)
-        .filter(PersistentChatMemoryStore::isQuestion)
-        .count();
 
-    boolean hasSummaryAlready = existingMessages.stream()
-        .filter(PersistentChatMemoryStore::isAssistant)
-        .map(UserChatMemory::getMessage)
-        .anyMatch(PersistentChatMemoryStore::isSummary);
-
-    // 3) 기존 중복 키
+    // 2. 기존 메시지를 문자열 기반으로 매핑
     Set<String> existingMessageKeys = existingMessages.stream()
         .map(m -> m.getRole() + "::" + m.getMessage())
         .collect(Collectors.toSet());
 
-    // 4) 새 메시지 매핑 + 정책 강제  ← 변경
-    List<UserChatMemory> messagesToSave = new ArrayList<>();
-    for (ChatMessage message : newMessages) {
-      String role;
-      String content;
+    // 3. 새 메시지 중 DB에 없는 것만 추려냄
+    List<UserChatMemory> messagesToSave = newMessages.stream()
+        .map(message -> {
+          String role;
+          String content;
 
-      if (message instanceof UserMessage um) {
-        role = "USER";
-        content = um.contents().stream()
-            .filter(c -> c instanceof TextContent)
-            .map(c -> ((TextContent) c).text())
-            .collect(Collectors.joining("-"));
+          if (message instanceof UserMessage) {
+            role = "USER";
+            content = ((UserMessage) message).contents().stream()
+                .filter(c -> c instanceof TextContent)
+                .map(c -> ((TextContent) c).text())
+                .collect(Collectors.joining("-"));
 
-      } else if (message instanceof AiMessage am) {
-        role = "ASSISTANT";
-        content = am.text();
+          } else if (message instanceof AiMessage) {
+            role = "ASSISTANT";
+            content = ((AiMessage) message).text();
+          } else if (message instanceof SystemMessage) {
+            role = "SYSTEM";
+            content = ((SystemMessage) message).text();
+          } else {
+            throw new IllegalArgumentException("지원하지 않는 Message 타입입니다.");
+          }
 
-        // 한 메시지에 [Q…] 여러 줄이면 첫 줄만 저장
-        if (content != null && content.contains("[Q")) {
-          content = keepOnlyFirstQLineIfAny(content);
-        }
-
-        // (A) 조기 요약 차단: 10문 이전 [요약]/[SUMMARY]는 저장하지 않음
-        if (isSummary(content) && qCountSoFar < QUESTION_LIMIT) {
-          continue;
-        }
-
-        // (B) 초과 질문 차단: 10문 이후 [Q…]는 저장하지 않음
-        if (isQuestion(content) && qCountSoFar >= QUESTION_LIMIT) {
-          continue;
-        }
-
-        // (C) 질문이면 번호 보정 + 카운트 업
-        if (isQuestion(content)) {
-          int expected = (int) (qCountSoFar + 1);
-          int got = extractQNumber(content);
-          if (got != expected) content = normalizeQNumber(content, expected);
-          qCountSoFar++;
-        }
-
-      } else if (message instanceof SystemMessage sm) {
-        role = "SYSTEM";
-        content = sm.text();
-
-      } else {
-        throw new IllegalArgumentException("지원하지 않는 Message 타입입니다.");
-      }
-
-      UserChatMemory m = UserChatMemory.builder()
-          .role(role)
-          .memoryRecallRound(memoryRecallRound)
-          .message(content)
-          .createdAt(LocalDateTime.now())
-          .build();
-
-      String key = m.getRole() + "::" + m.getMessage();
-      boolean dup = existingMessageKeys.contains(key)
-          || messagesToSave.stream().anyMatch(e -> (e.getRole() + "::" + e.getMessage()).equals(key));
-      if (!dup) messagesToSave.add(m);
-    }
+          return UserChatMemory.builder()
+//              .memoryId(id)
+              .role(role)
+              .memoryRecallRound(memoryRecallRound)
+              .message(content)
+              .createdAt(LocalDateTime.now()) // 실제 상황에서는 시간 보정 필요
+              .build();
+        })
+        .filter(m -> !existingMessageKeys.contains(m.getRole() + "::" + m.getMessage())) // 중복 제거
+        .collect(Collectors.toList());
 
     // 4. 새 메시지만 저장
     if (!messagesToSave.isEmpty()) {
