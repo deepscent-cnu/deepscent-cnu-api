@@ -83,7 +83,7 @@ jobs:
       - name: Configure SSH private key
         run: |
           touch ./scentmemory.pem
-          echo "${{ secrets.CAU_AWS_SSH_KEY }}" > ./scentmemory.pem
+          echo "${{ secrets.AWS_SSH_KEY }}" > ./scentmemory.pem
           chmod 600 ./scentmemory.pem
 
       - name: Add AWS EC2 to known_hosts
