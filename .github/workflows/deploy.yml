@@ -34,6 +34,11 @@ jobs:
           touch ./src/main/resources/application-test.properties
           echo "${{ secrets.APPLICATION_TEST_PROPERTIES }}" > ./src/main/resources/application-test.properties
 
+      - name: Configure Secret Properties
+        run: |
+          touch ./src/main/resources/application-secret.properties
+          echo "${{ secrets.APPLICATION_SECRET_PROPERTIES }}" > ./src/main/resources/application-secret.properties
+
       - name: gradlew에 실행 권한 부여
         run: chmod +x ./gradlew
       
