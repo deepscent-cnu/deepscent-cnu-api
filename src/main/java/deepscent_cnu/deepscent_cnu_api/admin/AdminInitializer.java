@@ -21,8 +21,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdminInitializer implements ApplicationRunner {
 
-  private static final List<String> deviceIds = List.of("lounge_08D1F918C7E0",
-      "lounge_08D1F918C7E0", "lounge_08D1F918C7E0");
+  private static final List<String> deviceIds = List.of("lounge_08D1F918C7EC",
+      "lounge_08D1F918C7EC", "lounge_08D1F918C7EC");
   private final MemberService memberService;
   private final MemberRepository memberRepository;
   private final DeviceRegisterService deviceRegisterService;
