@@ -8,21 +8,20 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LlmConversationSummarizer implements ConversationSummarizer {
 
-  private final ChatLanguageModel model;
-
   private static final String SUMMARY_PROMPT = """
-다음은 한 회차 동안 '사용자'가 말한 내용만 시간순으로 모은 원문입니다.
-향기 단서: ${SCENT}
+      다음은 한 회차 동안 '사용자'가 말한 내용만 시간순으로 모은 원문입니다.
+      향기 단서: ${SCENT}
 
-요약 지침(중요):
-- 출력은 **한국어 한글**로만 작성합니다.
-- **딱 아래 형식**으로만 출력합니다. 다른 말머리/대괄호/해시태그/화자표시는 절대 쓰지 마세요.
-- 사건의 핵심(누구/어디/언제쯤/무엇/느낌)이 드러나도록 1~2문장으로 요약하고, 마지막 줄에 키워드 3개를 쉼표로 제시하세요.
-- 키워드는 꼭 한줄만 출력합니다.
+      요약 지침(중요):
+      - 출력은 **한국어 한글**로만 작성합니다.
+      - **딱 아래 형식**으로만 출력합니다. 다른 말머리/대괄호/해시태그/화자표시는 절대 쓰지 마세요.
+      - 사건의 핵심(누구/어디/언제쯤/무엇/느낌)이 드러나도록 1~2문장으로 요약하고, 마지막 줄에 키워드 3개를 쉼표로 제시하세요.
+      - 키워드는 꼭 한줄만 출력합니다.
 
-원문(사용자 발화만 제공됨):
-${TRANSCRIPT}
-""";
+      원문(사용자 발화만 제공됨):
+      ${TRANSCRIPT}
+      """;
+  private final ChatLanguageModel model;
 
   @Override
   public String summarizeFromRawText(String userTranscript, String scent) {
