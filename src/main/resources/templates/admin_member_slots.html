@@ -1,0 +1,331 @@
+<!-- src/main/resources/templates/admin-member-slots.html -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>회원 슬롯 관리</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background: #f9fafb;
+    }
+
+    header {
+      background: #3b82f6;
+      color: #fff;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    header a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    main {
+      padding: 1rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
+      padding: 1rem;
+    }
+
+    .muted {
+      color: #6b7280;
+      font-size: .9rem;
+    }
+
+    #status {
+      font-size: .9rem;
+      color: #fff;
+      margin-left: auto;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .slot {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .slot h3 {
+      margin: 0 0 8px;
+      font-size: .95rem;
+    }
+
+    .row {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: .5rem .6rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: .45rem .75rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    .btn.secondary {
+      background: #6b7280;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/admin/dashboard">← 대시보드</a>
+  <h1 style="margin:0; font-size:1.1rem;">회원 슬롯 관리</h1>
+  <span class="hidden" id="status">로딩 중...</span>
+</header>
+
+<main>
+  <div class="card">
+    <div class="row" style="justify-content:space-between;">
+      <div>
+        <div class="muted">회원 ID: <span id="memberIdLabel"></span></div>
+        <h2 style="margin:.25rem 0 0 0; font-size:1.05rem;">슬롯 (3대 × 4팬 = 12칸)</h2>
+      </div>
+      <div class="row">
+        <button class="btn secondary" id="refreshBtn">새로고침</button>
+      </div>
+    </div>
+
+    <!-- 12칸 그리드 -->
+    <div class="grid" id="slotsGrid"></div>
+  </div>
+</main>
+
+<!-- 서버에서 타겟 회원 id 주입 -->
+<div id="ctx" th:attr="data-member-id=${targetMemberId}"></div>
+
+<script>
+  const TOKEN_KEY = "accessToken";
+  const ctxEl = document.getElementById("ctx");
+  const TARGET_MEMBER_ID =
+      ctxEl?.dataset?.memberId ||
+      (location.pathname.match(/\/member\/(\d+)\/slots/)?.[1] ?? null);
+
+  function getToken() {
+    return (sessionStorage.getItem(TOKEN_KEY) || "").toString().trim().replace(/^Bearer\s+/i, "");
+  }
+
+  function showStatus(t) {
+    const el = document.getElementById("status");
+    if (!t) {
+      el.textContent = "";
+      el.classList.add("hidden");
+      return;
+    }
+    el.textContent = t;
+    el.classList.remove("hidden");
+  }
+
+  // 서버 응답: { "capsuleInfoList": [ { scentName, deviceNumber, fanNumber }, ... ] }
+  function normalizeCapsules(payload) {
+    const arr =
+        payload?.capsuleInfoList ||
+        payload?.capsules ||
+        payload?.data?.capsuleInfoList ||
+        payload?.data?.capsules ||
+        [];
+    if (!Array.isArray(arr)) {
+      return [];
+    }
+
+    // scentName → scent 로 통일
+    return arr.map(it => (it == null ? null : {
+      scent: it.scent ?? it.scentName ?? "",
+      deviceNumber: it.deviceNumber ?? "",
+      fanNumber: it.fanNumber ?? ""
+    }));
+  }
+
+  function indexToDF(idx) {
+    // 0..11 → (deviceNumber, fanNumber)
+    const deviceNumber = Math.floor(idx / 4) + 1; // 1..3
+    const fanNumber = (idx % 4) + 1;              // 1..4
+    return {deviceNumber, fanNumber};
+  }
+
+  function renderGrid(capsules) {
+    const grid = document.getElementById("slotsGrid");
+    grid.innerHTML = "";
+
+    // 12칸 보장(빈 칸은 null)
+    const fixed = Array.from({length: 12}, (_, i) => capsules[i] ?? null);
+
+    fixed.forEach((info, idx) => {
+      const {deviceNumber, fanNumber} = indexToDF(idx);
+      const scent = info?.scent ?? "";
+
+      const box = document.createElement("div");
+      box.className = "slot";
+      const inputId = `scent-${deviceNumber}-${fanNumber}`;
+      box.innerHTML = `
+        <h3>Device ${deviceNumber} / Fan ${fanNumber}</h3>
+        <div class="row">
+          <input id="${inputId}" type="text" value="${scent}" placeholder="향 입력 (예: A)" />
+          <button class="btn" data-d="${deviceNumber}" data-f="${fanNumber}" data-input="${inputId}">저장</button>
+        </div>
+      `;
+      grid.appendChild(box);
+    });
+
+    // 저장 버튼 핸들러
+    grid.querySelectorAll("button.btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const d = Number(btn.dataset.d);
+        const f = Number(btn.dataset.f);
+        const input = document.getElementById(btn.dataset.input);
+        const scent = input.value.trim();
+        await saveSlot(
+            {targetMemberId: Number(TARGET_MEMBER_ID), deviceNumber: d, fanNumber: f, scent});
+      });
+    });
+  }
+
+  async function loadSlots() {
+    const token = getToken();
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      location.href = "/admin/login";
+      return;
+    }
+    if (!TARGET_MEMBER_ID) {
+      alert("잘못된 경로입니다.");
+      location.href = "/admin/dashboard";
+      return;
+    }
+
+    document.getElementById("memberIdLabel").textContent = TARGET_MEMBER_ID;
+    showStatus("슬롯 정보를 불러오는 중...");
+
+    try {
+      const res = await fetch(`/api/device/get-slot/${TARGET_MEMBER_ID}`, {
+        headers: {"Authorization": "Bearer " + token}
+      });
+      const text = await res.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = null;
+      }
+
+      console.log("[get-slot] status:", res.status, "body:", text);
+
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          sessionStorage.removeItem(TOKEN_KEY);
+          alert("인증이 만료되었거나 유효하지 않습니다. 다시 로그인해주세요.");
+          location.href = "/admin/login";
+          return;
+        }
+        alert((data && data.message) ? data.message : `조회 실패 (HTTP ${res.status})`);
+        return;
+      }
+
+      const capsules = normalizeCapsules(data);
+      // 길이가 12가 아닐 수도 있어 12칸으로 보정 후 렌더
+      renderGrid(capsules);
+    } catch (e) {
+      console.error(e);
+      alert("슬롯 정보를 불러오지 못했습니다.");
+    } finally {
+      showStatus("");
+    }
+  }
+
+  async function saveSlot({targetMemberId, deviceNumber, fanNumber, scent}) {
+    const token = getToken();
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      location.href = "/admin/login";
+      return;
+    }
+
+    showStatus("저장 중...");
+
+    try {
+      // 서버 DTO: RegisterSlotInfoRequest(memberId, deviceNumber, fanNumber, scent) → 현재는 targetMemberId 사용!
+      const body = JSON.stringify({targetMemberId, deviceNumber, fanNumber, scent});
+
+      const res = await fetch("/api/device/register-slot", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body
+      });
+
+      const text = await res.text();
+      console.log("[register-slot] status:", res.status, "body:", text);
+
+      if (res.status === 204) {
+        showStatus("");
+        alert("저장되었습니다.");
+        // 필요 시 즉시 재조회
+        // await loadSlots();
+        return;
+      }
+
+      let data;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = null;
+      }
+      if (res.status === 401 || res.status === 403) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        alert("인증이 만료되었거나 유효하지 않습니다. 다시 로그인해주세요.");
+        location.href = "/admin/login";
+        return;
+      }
+      alert((data && data.message) ? data.message : `저장 실패 (HTTP ${res.status})`);
+    } catch (e) {
+      console.error(e);
+      alert("저장 중 오류가 발생했습니다.");
+    } finally {
+      showStatus("");
+    }
+  }
+
+  document.getElementById("refreshBtn").addEventListener("click", loadSlots);
+  loadSlots();
+</script>
+</body>
+</html>

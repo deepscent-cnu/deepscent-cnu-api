@@ -35,3 +35,16 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Secret Config ###
+application-secret.properties
+application-prod.properties
+application-test.properties
+application.properties
+./application-secret.properties
+./application-prod.properties
+./application-test.properties
+
+### macOS ###
+.DS_Store
+**/.DS_Store

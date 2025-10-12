@@ -1,0 +1,10 @@
+package deepscent_cnu.deepscent_cnu_api.device_info.dto.request;
+
+public record RegisterSlotInfoRequest(
+    Long targetMemberId,
+    Integer deviceNumber,
+    Integer fanNumber,
+    String scent
+) {
+
+}

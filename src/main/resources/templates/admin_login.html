@@ -1,0 +1,188 @@
+<!-- src/main/resources/templates/admin_login.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>관리자 로그인</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f5f5f5;
+      margin: 0;
+    }
+
+    .card {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+      width: 100%;
+      max-width: 360px;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0 0 1.5rem;
+      font-size: 1.25rem;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: .4rem;
+      font-size: .9rem;
+      color: #333;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: .75rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: .95rem;
+    }
+
+    button {
+      width: 100%;
+      padding: .85rem;
+      border: none;
+      border-radius: 8px;
+      background: #3b82f6;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button[disabled] {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .msg {
+      margin-top: .75rem;
+      text-align: center;
+      font-size: .9rem;
+      min-height: 1.2em;
+    }
+
+    .msg.error {
+      color: #b91c1c;
+    }
+
+    .msg.success {
+      color: #166534;
+    }
+
+    .muted {
+      color: #777;
+      font-size: .85rem;
+      text-align: center;
+      margin-top: .5rem;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>관리자 로그인</h1>
+
+  <div class="msg" id="message"></div>
+
+  <form autocomplete="on" id="loginForm">
+    <div class="field">
+      <label for="phoneNumber">전화번호</label>
+      <input autofocus id="phoneNumber" name="phoneNumber" required type="text"/>
+    </div>
+
+    <div class="field">
+      <label for="password">비밀번호</label>
+      <input id="password" name="password" required type="password"/>
+    </div>
+
+    <button id="submitBtn" type="submit">로그인</button>
+    <div class="muted">로그인 후 관리자 페이지로 이동합니다.</div>
+  </form>
+</div>
+
+<script>
+  const TOKEN_KEY = "accessToken";
+
+  const form = document.getElementById("loginForm");
+  const msg = document.getElementById("message");
+  const submitBtn = document.getElementById("submitBtn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.textContent = "";
+    msg.className = "msg";
+
+    const phoneNumber = document.getElementById("phoneNumber").value.trim();
+    const password = document.getElementById("password").value;
+
+    if (!phoneNumber || !password) {
+      msg.textContent = "전화번호와 비밀번호를 입력하세요.";
+      msg.className = "msg error";
+      return;
+    }
+
+    submitBtn.disabled = true;
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = "로그인 중...";
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({phoneNumber, password})
+      });
+
+      const text = await res.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok || !data || data.success !== true || !data.data) {
+        const serverMsg = data?.message || "로그인 실패: 전화번호/비밀번호를 확인하세요.";
+        msg.textContent = serverMsg;
+        msg.className = "msg error";
+        return;
+      }
+
+      // ✅ 토큰 정규화: "Bearer xxx" → "xxx"
+      const raw = (data.data ?? "").toString();
+      const token = raw.replace(/^Bearer\s+/i, "").trim();
+      if (!token) {
+        msg.textContent = "토큰이 비어 있습니다.";
+        msg.className = "msg error";
+        return;
+      }
+
+      // ✅ 세션스토리지에만 저장
+      sessionStorage.setItem(TOKEN_KEY, token);
+
+      msg.textContent = "로그인 성공!";
+      msg.className = "msg success";
+
+      window.location.href = "/admin/dashboard";
+    } catch (err) {
+      console.error(err);
+      msg.textContent = "서버 오류가 발생했습니다.";
+      msg.className = "msg error";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  });
+</script>
+</body>
+</html>
