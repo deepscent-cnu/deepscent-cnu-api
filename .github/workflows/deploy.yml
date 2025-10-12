@@ -104,6 +104,7 @@ jobs:
           # EC2의 deploy.sh 실행
           ssh -i ./scentmemory.pem ubuntu@${{ secrets.AWS_EC2_IP }} << 'EOF'
             tar -xzvf /home/ubuntu/repository/deepscent-cnu-0.0.1-SNAPSHOT.jar.tar.gz -C /home/ubuntu/repository
+            chmod +x /home/ubuntu/repository/deploy.sh
             /home/ubuntu/repository/deploy.sh
           EOF
       
