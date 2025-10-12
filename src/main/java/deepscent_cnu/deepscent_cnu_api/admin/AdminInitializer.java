@@ -40,6 +40,10 @@ public class AdminInitializer implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
+    if (memberRepository.existsByPhoneNumber("admin")) {
+      return;
+    }
+
     MemberResponse memberResponse = memberService.signup(
         new SignupRequest("관리자", LocalDate.of(1990, 1, 1), "admin", password)
     );
