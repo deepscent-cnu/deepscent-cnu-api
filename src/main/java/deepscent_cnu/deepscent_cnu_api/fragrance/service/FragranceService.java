@@ -124,7 +124,7 @@ public class FragranceService {
 
     String target_uri = DEEPSCENT_BASE_URL + "/api/device/" + targetDeviceId + "/state";
     Map<String, Object> payload = Map.of("fan" + fanStateRequest.fanNumber(),
-        fanStateRequest.fanSpeed());
+        fanStateRequest.fanSpeed(), "turbo", true);
 
     ResponseEntity<String> response = restClient.patch()
         .uri(URI.create(target_uri))
