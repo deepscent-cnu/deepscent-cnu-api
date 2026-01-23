@@ -187,9 +187,14 @@ public class FragranceService {
   }
 
   private List<String> getScentOptionsFalse(String correctScentOption) {
-    List<String> scentOptionCandidates = Arrays.asList("백미밥", "참기름", "장미", "된장", "나프탈렌", "치약", "레몬",
-        "베르가못", "라벤더", "연탄", "허브", "청국장", "인센스", "파인", "고추장", "커피", "잡곡밥", "체리", "오렌지", "로즈마리",
-        "버베나", "샌달우드", "네롤리", "라일락", "베티버", "앰버", "머스크");
+//    List<String> scentOptionCandidates = Arrays.asList("백미밥", "참기름", "장미", "된장", "나프탈렌", "치약", "레몬",
+//        "베르가못", "라벤더", "연탄", "허브", "청국장", "인센스", "파인", "고추장", "커피", "잡곡밥", "체리", "오렌지", "로즈마리",
+//        "버베나", "샌달우드", "네롤리", "라일락", "베티버", "앰버", "머스크");
+
+    List<String> scentOptionCandidates = Arrays.asList("초콜릿", "시나몬", "사과", "파스", "홍삼",
+        "딸기", "카레", "수박", "멜론", "오렌지", "파인", "포도", "커피", "김치", "꿀", "비누",
+        "바나나", "파인애플", "자몽", "녹차", "참기름", "마늘", "배");
+
     List<String> scentOptionCandidatesFiltered = new ArrayList<>();
 
     for (String scentOptionCandidate : scentOptionCandidates) {
