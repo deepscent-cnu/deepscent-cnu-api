@@ -55,7 +55,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
   private static String sessionTitleOf(Long round) {
     int n = (round == null) ? 0 : round.intValue();
     return switch (n) {
-      case 1 -> "어린 시절";
+      case 1 -> "어린 시절-학창 시절 문구용품, 가방, 교복, 교통수단";
       case 2 -> "가족";
       case 3 -> "학교/학창 시절";
       case 4 -> "결혼/연애";
