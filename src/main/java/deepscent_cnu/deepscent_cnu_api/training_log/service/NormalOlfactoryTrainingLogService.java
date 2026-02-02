@@ -27,7 +27,7 @@ public class NormalOlfactoryTrainingLogService {
         logRequest.totalTimeTaken());
     NormalOlfactoryTrainingLog createdTrainingLog = trainingLogRepository.save(trainingLog);
 
-    for (int round = 1; round <= 4; round++) {
+    for (int round = 1; round <= 12; round++) {
       RoundLog roundLogRequest = logRequest.roundLogs().get(round - 1);
       NormalOlfactoryTrainingRoundLog roundLog = new NormalOlfactoryTrainingRoundLog(
           createdTrainingLog, round, roundLogRequest.correctOption(),
