@@ -56,7 +56,7 @@ public class PersistentChatMemoryStore implements ChatMemoryStore {
     int n = (round == null) ? 0 : round.intValue();
     return switch (n) {
       case 1 -> "어린 시절";
-      case 2 -> "가족";
+      case 2 -> "학창 시절/학교";
       case 3 -> "학교/학창 시절";
       case 4 -> "결혼/연애";
       case 5 -> "자녀/육아";
